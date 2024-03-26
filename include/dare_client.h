@@ -31,8 +31,8 @@
 /* Client types */
 #define CLT_TYPE_RECONF 1
 #define CLT_TYPE_LOOP   2
-#define CLT_TYPE_TRACE  3
-#define CLT_TYPE_RTRACE  4
+#define CLT_TYPE_TRACE  3   // 
+#define CLT_TYPE_RTRACE  4 // 会显示时间信息 对trace中的每个命令重复measure_count次
 
 #define MAX_LINE_LENGTH 128
 

@@ -387,6 +387,7 @@ output_cb( EV_P_ ev_timer *w, int revents )
 /**
  * Read a command from the trace file and send it to the RSM
  */
+// 从trace file中消费request
 static void
 consume_trace_cb( EV_P_ ev_timer *w, int revents )
 {
