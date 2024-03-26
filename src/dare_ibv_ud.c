@@ -678,7 +678,8 @@ ud_send_message( ud_ep_t *ud_ep, uint32_t len )
     // send_wr.wr.ud.remote_qpn(X) must be equal to qp->qp_num(Y)
     wr.wr.ud.remote_qpn  = ud_ep->qpn;
     wr.wr.ud.remote_qkey = 0;
-     
+    
+    // lxl: tag1 可以当做开始发送的tag
     rc = ibv_post_send(IBDEV->ud_qp, &wr, &bad_wr);
     if (0 != rc) {
         error_return(1, log_fp, "ibv_post_send failed because %s\n", strerror(rc));
@@ -688,6 +689,7 @@ ud_send_message( ud_ep_t *ud_ep, uint32_t len )
     struct ibv_wc wc;
     int num_comp;
      
+    // client的请求都是串行的 
     do {
         num_comp = ibv_poll_cq(IBDEV->ud_scq, 1, &wc);
     } while (num_comp == 0);
