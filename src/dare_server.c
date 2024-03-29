@@ -479,6 +479,7 @@ shutdown:
 /**
  * Exchange RC info
  * Note: the timer is stopped when establishing connections with 
+ * 后续看这一块会不会建立连接
  * at least half of the servers  
  */
 static void
@@ -1788,6 +1789,7 @@ commit_new_entries()
             {
                 continue;
             }
+            // 对面满了，跳过
             if (data.ctrl_data->vote_ack[i] == data.log->len) {
                 continue;
             }
@@ -1847,6 +1849,7 @@ apply_committed_entries()
         /* Just the leader... */
         if ( (NOOP == entry->type) || (HEAD == entry->type) )
             goto apply_next_entry;
+        // lxl tag2：这里回复client请求
         if (CSM == entry->type) {
             /* Client SM entry */
             if (entry->req_id != 0) {
