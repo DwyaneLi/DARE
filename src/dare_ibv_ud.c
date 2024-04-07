@@ -689,7 +689,6 @@ ud_send_message( ud_ep_t *ud_ep, uint32_t len )
     struct ibv_wc wc;
     int num_comp;
      
-    // client的请求都是串行的 
     do {
         num_comp = ibv_poll_cq(IBDEV->ud_scq, 1, &wc);
     } while (num_comp == 0);
@@ -1002,6 +1001,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
     
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
+    // lxl:在这里给client发送回复
     rc = ud_send_message(&ep->ud_ep, len);
     if (0 != rc) {
         error(log_fp, "Cannot send message over UD to %"PRIu16"\n", 
@@ -1057,6 +1057,7 @@ handle_csm_write_requests( struct ibv_wc *write_wcs, uint16_t write_count )
 
 /** 
  * Handle a single CSM WRITE request
+ * lxl tag1：server处理client的请求
  */
 static void 
 handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )

@@ -1783,6 +1783,7 @@ commit_new_entries()
         /* Check if any server is behind */
         uint8_t i, size = get_group_size(data.config);
         for (i = 0; i < size; i++) {
+            // 是自己、或者对应节点失活就跳过
             if ( (i == data.config.idx) ||
                 !CID_IS_SERVER_ON(data.config.cid, i) ||
                 (data.config.servers[i].fail_count >= PERMANENT_FAILURE) )
