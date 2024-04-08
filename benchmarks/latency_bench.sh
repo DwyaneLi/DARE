@@ -47,6 +47,7 @@ StartDare() {
             continue
         fi
         run_dare=( "${DAREDIR}/bin/srv_test" "-l $PWD/srv${i}.log" "-n ${nodes[$j]}" "-s $1" "-i $i" "-m $DGID" )
+        # nohup保证会话结束之后dare继续运行
         cmd=( "ssh" "$USER@${nodes[$j]}" "nohup" "${run_dare[@]}" "${redirection[@]}" "&" "echo \$!" )
         pids[${nodes[$j]}]=$("${cmd[@]}")
         echo -e "COMMAND: "${cmd[@]}
@@ -118,9 +119,11 @@ trace_file="$PWD/data/trace_lat_${OPCODE}_g${server_count}.trace"
 rm -f *.log
 
 # Handle SIGINT to ensure a clean exit
+# ctrl c退出
 trap 'echo -ne "Stop all servers..." && StopDare && echo "done" && exit 1' INT
 
 # mckey program is used to generate a dgid that provides the required multicast address
+# 使用mckey生成dgid
 echo 'executing mckey, please wait ...'
 MCKEY_M=`ip addr show ib0 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'|cut -d/ -f1`
 mckey -m $MCKEY_M > mckey_dump &
@@ -130,7 +133,7 @@ echo 'Extraction of dgid from mckey finished ... '
 
 
 ########################################################################
-
+#启动程序
 echo "Starting $server_count servers..."
 StartDare $server_count
 echo "done!"
