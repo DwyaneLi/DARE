@@ -163,7 +163,8 @@ int main(int argc, char* argv[])
     
     rc = dare_server_init(&input);
     if (0 != rc) {
-        fprintf(log_fp, "Cannot init client\n");
+        //fprintf(log_fp, "Cannot init client\n");
+        fprintf(log_fp, "Cannot init server\n");
         return 1;
     }
     

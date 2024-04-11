@@ -181,7 +181,8 @@ int main(int argc, char* argv[])
 
         goto end;
     }
-    
+    // trace 文件生成，在这个模式下就是write/put一个，再把他read/get出来
+    // 每个命令的key是这样的key+size，例如key123
     uint16_t size = MIN_DATA_LEN;
     for (;size <= MAX_DATA_LEN; size <<= 1) {
         /* Add write */
