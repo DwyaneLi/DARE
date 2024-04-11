@@ -122,7 +122,7 @@ trap 'echo -ne "Stop all servers..." && StopDare && echo "done" && exit 1' INT
 
 # mckey program is used to generate a dgid that provides the required multicast address
 echo 'executing mckey, please wait ...'
-MCKEY_M=`ip addr show ib0 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'|cut -d/ -f1`
+MCKEY_M=`ip addr show ibs5 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'|cut -d/ -f1`
 mckey -m $MCKEY_M > mckey_dump &
 mckey -m $MCKEY_M -s > /dev/null
 DGID=`cat mckey_dump | grep 'dgid'| cut -d " " -f4`
