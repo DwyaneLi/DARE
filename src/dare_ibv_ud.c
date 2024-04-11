@@ -42,6 +42,7 @@ char* global_mgid;
 
 struct ibv_wc *wc_array;
 
+typedef struct timeval timeval;
 /* ================================================================== */
 
 static int 
@@ -979,9 +980,18 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
             return;
         }
     }
+
+    /*record time t_s*/
+    timeval t_s;
+    auto res = gettimeofday(&t_s, NULL);
+    if(res) {
+        errnor(log_fp, "get request:%d start raft time error\n", request->hdr.id);
+    }
+
     else if (SRV_DATA->last_cmt_write_csm_idx < SRV_DATA->last_write_csm_idx) {
         /* There are not-committed write requests; so wait */
         ep->wait_for_idx = SRV_DATA->last_write_csm_idx;
+        ep->last_req_start_time = t_s;
         memcpy(ep->last_read_request, request, wc->byte_len - 40);
         return;
     }
@@ -999,6 +1009,14 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
         error(log_fp, "Cannot apply read operation to the state machine\n");
     }
     
+    /*record time t_e*/
+    timeval t_e;
+    res = gettimeofday(&t_e, NULL);
+    if(res) {
+        errnor(log_fp, "get request:%d end raft time error\n", request->hdr.id);
+    }
+    reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
+
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
@@ -2082,6 +2100,15 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
         error(log_fp, "Cannot apply read operation to the state machine\n");
     }
     
+    /*record time t_e*/
+    timeval t_s = ep->last_req_start_time;
+    timeval t_e;
+    auto res = gettimeofday(&t_e, NULL);
+    if(res) {
+        errnor(log_fp, "get request:%d end raft time error\n", request->hdr.id);
+    }
+    reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
+
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);

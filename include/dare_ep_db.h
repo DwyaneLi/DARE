@@ -14,7 +14,7 @@
 
 #include <rbtree.h>
 #include <dare_ibv.h>
-
+#include <sys/time.h>
 /* ================================================================== */
 
 struct dare_ep_t {
@@ -27,6 +27,7 @@ struct dare_ep_t {
                             with lower IDs */
     uint64_t cid_idx;
     int committed;
+    timeval last_req_start_time;
 };
 typedef struct dare_ep_t dare_ep_t;
 

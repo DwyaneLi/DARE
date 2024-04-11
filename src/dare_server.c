@@ -291,7 +291,7 @@ init_server_data()
 
     /* Set up the configuration */
     data.config.idx = data.input->server_idx;
-    info(log_fp, "this server index = %d", data.config.idx);
+    info(log_fp, "This server index = %d\n", data.config.idx);
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {
         error_return(1, log_fp, "Cannot have more than %d servers\n", 
