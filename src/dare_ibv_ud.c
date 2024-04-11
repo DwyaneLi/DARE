@@ -262,6 +262,7 @@ ud_prerequisite( uint32_t receive_count )
     {
         error_return(1, log_fp, "Cannot find max UD inline data\n");
     }
+    IBDEV->ud_max_inline_data = 512;
     return 0;
 }
 
@@ -411,7 +412,7 @@ ud_qp_create()
 
     qp = ibv_create_qp(IBDEV->ud_pd, &init_attr); 
     if (NULL == qp) {
-        error_return(1, log_fp, "Could not create UD listen queue pair");
+        error_return(1, log_fp, "Could not create UD listen queue pair: %s  max inline data: %d  max send wr: %d\n", strerror(errno), init_attr.cap.max_inline_data, init_attr.cap.max_send_wr);
     }
     /* end: create the UD queue pair */
     

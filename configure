@@ -90,7 +90,7 @@ cp ${MF}.in ${MF}
 sed -e 's,#PREFIX#,'${PREFIX}',' \
     -e 's,#EV_LIB#,'${EVDIR}'/lib/libev.a,' \
     -e 's,#EV_INCLUDE#,-I'${EVDIR}'/include,' \
-    -e 's,#IBV_LIB#,'-L${IBVDIR}'/lib -libverbs,' \
+    -e 's,#IBV_LIB#,'-L${IBVDIR}'/lib/x86_64-linux-gnu -libverbs,' \
     -e 's,#IBV_INCLUDE#,-I'${IBVDIR}'/include,' \
     ${MF} > sed.out && mv sed.out ${MF} || exit 1
 

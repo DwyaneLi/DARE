@@ -226,6 +226,7 @@ rc_prerequisite()
     {
         error_return(1, log_fp, "Cannot find max RC inline data\n");
     }
+    IBDEV->rc_max_inline_data = 512;
     info(log_fp, "# MAX_INLINE_DATA = %"PRIu32"\n", IBDEV->rc_max_inline_data);
     
     /* Allocate array for work completion */
@@ -331,7 +332,7 @@ rc_qp_create( dare_ib_ep_t* ep )
         qp_init_attr.cap.max_send_wr = IBDEV->rc_max_send_wr;
         ep->rc_ep.rc_qp[i].qp = ibv_create_qp(IBDEV->rc_pd, &qp_init_attr);
         if (NULL == ep->rc_ep.rc_qp[i].qp) {
-            error_return(1, log_fp, "Cannot create QP\n");
+            error_return(1, log_fp, "Cannot create QP%d: %s  max inline data:%d  max_send_wr:%d\n", i, strerror(errno), qp_init_attr.cap.max_inline_data, qp_init_attr.cap.max_send_wr);
         }
         ep->rc_ep.rc_qp[i].signaled_wr_id = 0;
         ep->rc_ep.rc_qp[i].send_count = 0;
