@@ -963,7 +963,14 @@ static void
 handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
-    
+
+    /*record time t_s*/
+    timeval t_s;
+    int res = gettimeofday(&t_s, NULL);
+    if(res) {
+        errnor(log_fp, "get request:%d start raft time error\n", request->hdr.id);
+    }
+
     /* Find the ep that send this request */
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, wc->slid);
     if (ep == NULL) {
@@ -979,13 +986,6 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
             /* Write request not committed yet */
             return;
         }
-    }
-
-    /*record time t_s*/
-    timeval t_s;
-    auto res = gettimeofday(&t_s, NULL);
-    if(res) {
-        errnor(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     }
 
     else if (SRV_DATA->last_cmt_write_csm_idx < SRV_DATA->last_write_csm_idx) {
@@ -1080,6 +1080,13 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
+    /*record time t_s*/
+    timeval t_s;
+    int res = gettimeofday(&t_s, NULL);
+    if(res) {
+        errnor(log_fp, "get request:%d start raft time error\n", request->hdr.id);
+    }
+
     /* TODO !!!! implement protocol SM that stores clients and their 
     most recent request; therefore, a client cannot issue 
     the same write operation twice (not implemented) */
@@ -1122,6 +1129,17 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         total_req = 0;
     }
 #endif    
+
+    /*add start time info in ep*/
+    write_time_t *w_t; 
+    HASH_FIND_INT(ep->write_time, &request->hdr.id, w_t);
+    if(w_t == NULL) {
+        w_t = (write_time_t *)malloc(sizeof(w_t));
+        w_t->id = request->hdr.id;
+        w_t->start_time = t_s;
+        HASH_ADD_INT(ep->write_time, id, w_t);
+        info(log_fp, "request%d from %d's time is recorded\n", request->hdr.id, wc->slid);
+    }
 
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
@@ -2103,7 +2121,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
     /*record time t_e*/
     timeval t_s = ep->last_req_start_time;
     timeval t_e;
-    auto res = gettimeofday(&t_e, NULL);
+    int res = gettimeofday(&t_e, NULL);
     if(res) {
         errnor(log_fp, "get request:%d end raft time error\n", request->hdr.id);
     }
@@ -2143,6 +2161,18 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     switch(type) {
         case CSM:
             /* Reply to a ClientSM request */
+            /*record time t_e*/
+            timeval t_e;
+            int res = gettimeofday(&t_e, NULL);
+            if(res) {
+                errnor(log_fp, "get request:%d end raft time error\n", req_id);
+            }
+            write_time_t *w_t;
+            HASH_FIND_INT(ep->write_time, &req_id, w_t);
+            if(w_t != NULL) {
+                csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
+            }
+
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
             memset(csm_reply, 0, sizeof(client_rep_t));
             // TODO: you should get the last_req_id from the protocol SM
@@ -2213,8 +2243,9 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     }
     
     if (reply->data.len != 0) {
-        debug(log_fp, "Received data: %.*s\n", 
-            reply->data.len, reply->data.data);
+        debug(log_fp, "Received data of Request %d : %.*s\n", 
+            reply->hdr.id, reply->data.len, reply->data.data);
+        info(log_fp, "the Request %d consume %d ns in raft\n", reply->time_raft);
     }
     
     return 0;
