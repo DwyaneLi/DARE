@@ -2172,6 +2172,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 static int 
 handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
 {
+    debug(log_fp, "Received the reply of request%d\n", reply->hdr.id);
     if (reply->hdr.id < IBDEV->request_id) {
         /* Old reply; ignore */
         return 0;
