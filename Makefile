@@ -4,9 +4,9 @@
 # Author(s): Marius Poke <marius.poke@inf.ethz.ch>
 #
 
-CC = gcc
+CC = g++
 
-FLAGS        = -std=gnu99 -I./include -I./utils/rbtree/include -I/usr/include
+FLAGS        = -std=c++11 -I./include -I./utils/rbtree/include -I/usr/include
 CFLAGS       = -Wl,--no-as-needed -Wall -Wunused-function -Wextra
 LDFLAGS      = -L/usr/lib/x86_64-linux-gnu -libverbs -lm
 
