@@ -2210,8 +2210,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             if(w_t != NULL) {
                 info(log_fp, "set reply %d time raft\n", req_id);
                 info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
-                info(log_fp, "request:%d end sec:%ld end:%ld\n",req_id, t_e.tv_sec, t_e.tv_usec);
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
+                info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
                 //HASH_DEL(write_time, w_t);
                 //free(w_t);
             } else {
