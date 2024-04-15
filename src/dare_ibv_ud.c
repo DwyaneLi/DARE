@@ -1192,7 +1192,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
                 /* Ignore request */
                 break;
             }
-            info(log_fp, ">> Received join request from server with lid%"
+            info(log_fp, ">> Received join request from server with lid%d"
                 PRIu16"\n", wc->slid);
             /* Handle reply */
             rc = handle_server_join_request(wc, ud_hdr);
