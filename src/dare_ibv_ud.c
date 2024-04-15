@@ -1152,13 +1152,13 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     /*add start time info in ep*/
     
     write_time_t *w_t;
-    uint64_t tmp_id = combine_lid_req(request->hdr.id, wc->slid);
-    HASH_FIND(hh, write_time, &tmp_id, sizeof(tmp_id), w_t);
+    int tmp_id = combine_lid_req(request->hdr.id, wc->slid);
+    HASH_FIND_INT(write_time, &tmp_id, w_t);
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
         w_t->id = tmp_id;
         w_t->start_time = t_s;
-        HASH_ADD(hh, write_time, id, sizeof(tmp_id), w_t);
+        HASH_ADD_INT(write_time, id, w_t);
         info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);

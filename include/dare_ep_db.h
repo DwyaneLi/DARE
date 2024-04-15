@@ -21,13 +21,13 @@ typedef struct timeval timeval;
 
 
 struct write_time_t {
-    uint64_t id;
+    int id;
     timeval start_time;
     UT_hash_handle hh;
 };
 typedef struct write_time_t write_time_t;
 
-uint64_t combine_lid_req(uint64_t req_id, uint16_t lid);
+int combine_lid_req(uint64_t req_id, uint16_t lid);
 
 // 这个endpoint主要针对server上针对client ud通信的端口
 struct dare_ep_t {

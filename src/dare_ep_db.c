@@ -182,6 +182,6 @@ free_ep(dare_ep_t *ep)
     free(ep);
 }
 
-uint64_t combine_lid_req(uint64_t req_id, uint16_t lid) {
-    return ((req_id << 16) | lid);
+int combine_lid_req(uint64_t req_id, uint16_t lid) {
+    return (int)((req_id << 16) | lid);
 }
