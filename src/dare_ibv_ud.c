@@ -1091,6 +1091,8 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     }
 
+    debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
+
     /* TODO !!!! implement protocol SM that stores clients and their 
     most recent request; therefore, a client cannot issue 
     the same write operation twice (not implemented) */
@@ -1143,6 +1145,8 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t->start_time = t_s;
         HASH_ADD_INT(ep->write_time, id, w_t);
         info(log_fp, "request%d from %d's time is recorded\n", request->hdr.id, wc->slid);
+    } else {
+        debug(log_fp, "get request:%d record time fail\n", request->hdr.id);
     }
 
     if (ep->last_req_id >= request->hdr.id) {
