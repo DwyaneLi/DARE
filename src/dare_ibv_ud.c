@@ -1095,12 +1095,12 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
+    //info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
     if(!res) {
-        info(log_fp, "request:%d start sec:%ld usec:%ld\n",request->hdr.id, t_s.tv_sec, t_s.tv_usec);
+        debug(log_fp, "request:%d start sec:%ld usec:%ld\n",request->hdr.id, t_s.tv_sec, t_s.tv_usec);
     } else {
         debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
         error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
@@ -1161,7 +1161,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t->id = tmp_id;
         w_t->start_time = t_s;
         HASH_ADD_INT(write_time, id, w_t);
-        info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
+        debug(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
@@ -2057,7 +2057,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    //info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2296,7 +2296,7 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
             reply->hdr.id, reply->data.len, reply->data.data);
     }
 
-    info(log_fp, "the Request %d consume %u ns in raft\n",reply->hdr.id, reply->time_raft);
+    info(log_fp, "the Request:%d type:%d consume %u ns in raft\n",reply->hdr.id, reply->hdr.type, reply->time_raft);
     
     return 0;
 }
