@@ -15,18 +15,18 @@
 #include <rbtree.h>
 #include <dare_ibv.h>
 #include <sys/time.h>
-//#include <uthash.h>
+#include <uthash.h>
 /* ================================================================== */
 typedef struct timeval timeval;
 
-/*
+
 struct write_time_t {
     uint64_t id;
     timeval start_time;
     UT_hash_handle hh;
 };
 typedef struct write_time_t write_time_t;
-*/
+
 
 // 这个endpoint主要针对server上针对client ud通信的端口
 struct dare_ep_t {
@@ -40,7 +40,7 @@ struct dare_ep_t {
     uint64_t cid_idx;
     int committed;
     timeval last_req_start_time;
-    //write_time_t *write_time;
+    write_time_t *write_time;
 };
 typedef struct dare_ep_t dare_ep_t;
 

@@ -1084,7 +1084,6 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 
     info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
     /*record time t_s*/
-    /*
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
     if(res) {
@@ -1092,7 +1091,6 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     } else {
         debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
     }
-    */
 
     /* TODO !!!! implement protocol SM that stores clients and their 
     most recent request; therefore, a client cannot issue 
