@@ -42,6 +42,8 @@ char* global_mgid;
 
 struct ibv_wc *wc_array;
 
+write_time_t *write_time;
+
 typedef struct timeval timeval;
 /* ================================================================== */
 
@@ -138,6 +140,9 @@ int ud_init( uint32_t receive_count )
     /* Allocate memory for prefetching  UD requests */
     wc_array = (struct ibv_wc*)malloc(receive_count * sizeof(struct ibv_wc));
 
+    /* init write_time*/
+    write_time = NULL;
+
     return 0;
 }
 
@@ -145,6 +150,14 @@ void ud_shutdown()
 {
     if (NULL != wc_array) {
         free(wc_array);
+    }
+    if (NULL != write_time) {
+        write_time_t *current_write, *tmp;
+        HASH_ITER(hh, write_time, current_write, tmp) {
+            HASH_DEL(write_time, current_write);
+            free(current_write);
+        }
+        free(write_time);        
     }
     if (NULL != IBDEV->ib_mcast_ah) {
         ibv_destroy_ah(IBDEV->ib_mcast_ah);
@@ -1139,12 +1152,13 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     /*add start time info in ep*/
     
     write_time_t *w_t;
-    HASH_FIND(hh, ep->write_time, &request->hdr.id, sizeof(request->hdr.id), w_t);
+    uint64_t tmp_id = combine_lid_req(request->hdr.id, wc->slid);
+    HASH_FIND(hh, write_time, tmp_id, sizeof(tmp_id), w_t);
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
-        w_t->id = request->hdr.id;
+        w_t->id = tmp_id;
         w_t->start_time = t_s;
-        //HASH_ADD(hh, ep->write_time, id, sizeof(request->hdr.id), w_t);
+        //HASH_ADD(hh, write_time, id, sizeof(tmp_id), w_t);
         info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);

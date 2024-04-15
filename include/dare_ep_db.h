@@ -27,6 +27,9 @@ struct write_time_t {
 };
 typedef struct write_time_t write_time_t;
 
+uint64_t combine_lid_req(uint64_t req_id, uint16_t lid) {
+    return ((req_id << 16) | lid);
+}
 
 // 这个endpoint主要针对server上针对client ud通信的端口
 struct dare_ep_t {
@@ -40,7 +43,7 @@ struct dare_ep_t {
     uint64_t cid_idx;
     int committed;
     timeval last_req_start_time;
-    write_time_t *write_time;
+    //write_time_t *write_time;
 };
 typedef struct dare_ep_t dare_ep_t;
 
