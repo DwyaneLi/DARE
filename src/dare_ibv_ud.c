@@ -1084,6 +1084,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 
     info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
     /*record time t_s*/
+    /*
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
     if(res) {
@@ -1091,7 +1092,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     } else {
         debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
     }
-
+    */
 
     /* TODO !!!! implement protocol SM that stores clients and their 
     most recent request; therefore, a client cannot issue 
@@ -1138,6 +1139,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
+    /*
     write_time_t *w_t;
     HASH_FIND(hh, ep->write_time, &request->hdr.id, sizeof(request->hdr.id), w_t);
     if(w_t == NULL) {
@@ -1149,6 +1151,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
+    */
 
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
@@ -2182,6 +2185,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 
             /* Reply to a ClientSM request */
             /*record time t_e*/
+            /*
             debug(log_fp, "get the end time for request:%d\n", req_id);
             res = gettimeofday(&t_e, NULL);
             if(res) {
@@ -2194,6 +2198,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
                 //HASH_DEL(ep->write_time, w_t);
             }
+            */
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
             memset(csm_reply, 0, sizeof(client_rep_t));
             // TODO: you should get the last_req_id from the protocol SM

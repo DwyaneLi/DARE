@@ -69,7 +69,7 @@ dare_ep_t* ep_insert( struct rb_root *root, const uint16_t lid )
     ep->wait_for_idx = 0;
     
     /*create write time list*/
-    ep->write_time = NULL;
+    //ep->write_time = NULL;
     
     /* Create AH */
     ep->ud_ep.ah = ud_ah_create(lid);
@@ -170,6 +170,7 @@ free_ep(dare_ep_t *ep)
     ud_ah_destroy(ep->ud_ep.ah);
 
     /*释放write time*/
+    /*
     info(log_fp, "free ep\n");
     write_time_t *current_write, *tmp;
     HASH_ITER(hh, ep->write_time, current_write, tmp) {
@@ -177,6 +178,6 @@ free_ep(dare_ep_t *ep)
          free(current_write);
     }
     free(ep->write_time);
-
+    */
     free(ep);
 }
