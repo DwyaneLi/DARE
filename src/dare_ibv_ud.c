@@ -1099,7 +1099,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
-    if(res) {
+    if(!res) {
         info(log_fp, "request:%d start sec:%ld usec:%ld\n",request->hdr.id, t_s.tv_sec, t_s.tv_usec);
         error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     } else {
@@ -1161,9 +1161,9 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t->id = tmp_id;
         w_t->start_time = t_s;
         HASH_ADD_INT(write_time, id, w_t);
-        //info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
+        info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
-        //info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
+        info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
 
     if (ep->last_req_id >= request->hdr.id) {
@@ -2213,6 +2213,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
                 HASH_DEL(write_time, w_t);
                 free(w_t);
+            } else {
+                info(log_fp, "set reply %d not find start time raft\n", req_id);
             }
 
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
