@@ -1145,9 +1145,9 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t->id = request->hdr.id;
         w_t->start_time = t_s;
         HASH_ADD(hh, ep->write_time, id, sizeof(request->hdr.id), w_t);
-        debug(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
+        info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
-        debug(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
+        (log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
 
     if (ep->last_req_id >= request->hdr.id) {
@@ -2189,7 +2189,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             }
 
             HASH_FIND(hh, ep->write_time, &req_id, sizeof(req_id), w_t);
-            if(w_t != NULL) {;
+            if(w_t != NULL) {
+                info(log_fp, "set reply %d time raft\n", req_id);
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
             }
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
