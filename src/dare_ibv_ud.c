@@ -1136,9 +1136,11 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
-    debug(log_fp, "now hash find int\n");
-    write_time_t *w_t; 
+    debug(log_fp, "now hash find int1\n");
+    write_time_t *w_t;
+    debug(log_fp, "now hash find int2\n"); 
     HASH_FIND_INT(ep->write_time, &request->hdr.id, w_t);
+    debug(log_fp, "now hash find int3\n");
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
         w_t->id = request->hdr.id;
@@ -1148,7 +1150,8 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     } else {
         debug(log_fp, "get request:%d record time fail\n", request->hdr.id);
     }
-
+    debug(log_fp, "now hash find int4\n");
+    
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
