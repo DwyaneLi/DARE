@@ -2041,7 +2041,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    debug(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
