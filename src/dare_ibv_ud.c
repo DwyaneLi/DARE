@@ -2294,7 +2294,7 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
             reply->hdr.id, reply->data.len, reply->data.data);
     }
 
-    info(log_fp, "the Request %d consume %9.3lf ns in raft\n",reply->hdr.id, reply->time_raft);
+    info(log_fp, "the Request %d consume %u ns in raft\n",reply->hdr.id, reply->time_raft);
     
     return 0;
 }
