@@ -2153,6 +2153,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
 
 int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 {
+    debug(log_fp, "send reply for request:%d\n", req_id);
     int rc;
     dare_ib_ep_t *ib_ep;
     
@@ -2171,27 +2172,31 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     // TODO: you should get the last_req_id from the protocol SM
     ep->last_req_id = req_id;
     ep->committed = 1;
-    
-    /*FOR TEST*/
-    timeval t_e;
-    int res;
-    write_time_t *w_t;
 
     /* Create reply */
     switch(type) {
-        case CSM: 
+        case CSM:
+        { 
+            /*FOR TEST*/
+            timeval t_e;
+            int res;
+            write_time_t *w_t;
+
             /* Reply to a ClientSM request */
             /*record time t_e*/
+            debug(log_fp, "get the end time for request:%d\n", req_id);
             res = gettimeofday(&t_e, NULL);
             if(res) {
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
-
-            HASH_FIND(hh, ep->write_time, &req_id, sizeof(req_id), w_t);;
+            debug(log_fp, "now hash find int6\n");
+            HASH_FIND(hh, ep->write_time, &req_id, sizeof(req_id), w_t);
+            debug(log_fp, "now hash find int7\n");
             if(w_t != NULL) {
+                debug(log_fp, "now hash find int8\n");
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
             }
-
+            debug(log_fp, "now hash find int9\n");
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
             memset(csm_reply, 0, sizeof(client_rep_t));
             // TODO: you should get the last_req_id from the protocol SM
@@ -2212,7 +2217,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 measure_count = 0;
             }
 #endif             
-            break;  
+            break; 
+        } 
         case CONFIG:
             /* Reply to a reconfiguration request */
             psm_reply = (reconf_rep_t*)IBDEV->ud_send_buf;
