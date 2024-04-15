@@ -1083,7 +1083,6 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     int rc;
 
     debug(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
-    debug(log_fp, "lalalal\n");
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
@@ -1137,6 +1136,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
+    debug(log_fp, "lalalal\n");
     write_time_t *w_t; 
     HASH_FIND_INT(ep->write_time, &request->hdr.id, w_t);
     if(w_t == NULL) {
