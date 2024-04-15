@@ -1544,7 +1544,7 @@ int ud_update_rc_info()
 {
     dare_ib_ep_t *ep;
     uint8_t i, size = get_extended_group_size(SRV_DATA->config);
-    int i = 0;
+    uint8_t i = 0;
     for (i = 0; i < size; i++) {
         if (i == SRV_DATA->config.idx) continue;
         if (!CID_IS_SERVER_ON(SRV_DATA->config.cid, i)) continue;
