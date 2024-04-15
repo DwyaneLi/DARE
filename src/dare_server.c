@@ -1040,8 +1040,11 @@ polling()
     }
     debug(log_fp, "2\n");
     /* Stop here if not recovered yet */
-    if (!(dare_state & LOG_RECOVERED))
+    if (!(dare_state & LOG_RECOVERED)){
+        debug(log_fp, "10\n");
         return;
+    }
+
 
 /* Some code used for debugging and checking various IB properties */
 #if 0
