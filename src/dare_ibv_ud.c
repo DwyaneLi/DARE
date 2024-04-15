@@ -1100,6 +1100,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
     if(res) {
+        info(log_fp, "request:%d start sec:%ld usec:%ld\n",request->hdr.id, t_s.tv_sec, t_s.tv_usec);
         error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     } else {
         debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
@@ -2207,6 +2208,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             HASH_FIND_INT(write_time, &req_id, w_t);
             if(w_t != NULL) {
                 info(log_fp, "set reply %d time raft\n", req_id);
+                info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
+                info(log_fp, "request:%d end sec:%ld end:%ld\n",req_id, t_e.tv_sec, t_e.tv_usec);
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
                 HASH_DEL(write_time, w_t);
                 free(w_t);
