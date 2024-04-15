@@ -2179,10 +2179,11 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
         case CSM:
         { 
             /*FOR TEST*/
+            /*
             timeval t_e;
             int res;
             write_time_t *w_t;
-
+            */
             /* Reply to a ClientSM request */
             /*record time t_e*/
             /*
