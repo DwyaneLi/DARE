@@ -1088,9 +1088,10 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     int res = gettimeofday(&t_s, NULL);
     if(res) {
         error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
+    } else {
+        debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
     }
 
-    debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
 
     /* TODO !!!! implement protocol SM that stores clients and their 
     most recent request; therefore, a client cannot issue 
@@ -1137,11 +1138,8 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
-    debug(log_fp, "now hash find int1\n");
     write_time_t *w_t;
-    debug(log_fp, "now hash find int2\n"); 
     HASH_FIND(hh, ep->write_time, &request->hdr.id, sizeof(request->hdr.id), w_t);
-    debug(log_fp, "now hash find int3\n");
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
         w_t->id = request->hdr.id;
@@ -1149,10 +1147,9 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         HASH_ADD(hh, ep->write_time, id, sizeof(request->hdr.id), w_t);
         info(log_fp, "request%d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
-        debug(log_fp, "get request:%d record time fail\n", request->hdr.id);
+        debug(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
-    debug(log_fp, "now hash find int4\n");
-    debug(log_fp, "now hash find int5\n");
+
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
@@ -1204,8 +1201,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
                 /* Ignore request */
                 break;
             }
-            info(log_fp, ">> Received join request from server with lid%d"
-                PRIu16"\n", wc->slid);
+            //info(log_fp, ">> Received join request from server with lid%d"
+            //    PRIu16"\n", wc->slid);
             /* Handle reply */
             rc = handle_server_join_request(wc, ud_hdr);
             if (0 != rc) {
@@ -1217,7 +1214,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case RC_SYN:
         {
             /* First message of the 3-way handshake protocol */
-            debug(log_fp, ">> Received RC_SYN from client lid%"PRIu16"\n", wc->slid);
+            //(log_fp, ">> Received RC_SYN from client lid%"PRIu16"\n", wc->slid);
             type = MSG_NONE;
             rc = handle_rc_syn(wc, (rc_syn_t*)ud_hdr);
             if (0 != rc) {
@@ -1229,7 +1226,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case RC_SYNACK:
         {
             /* Second message of the 3-way handshake protocol */
-            info(log_fp, ">> Received RC_SYNACK from lid%"PRIu16"\n", wc->slid);
+            //info(log_fp, ">> Received RC_SYNACK from lid%"PRIu16"\n", wc->slid);
             type = MSG_NONE;
             rc = handle_rc_synack(wc, (rc_syn_t*)ud_hdr);
             if (0 != rc) {
@@ -1568,7 +1565,7 @@ int ud_update_rc_info()
     if (i == size) {
         return 0;
     }
-    debug(log_fp, "now size != %u, so call ud_exchange_rc_info()\n", i);
+    //(log_fp, "now size != %u, so call ud_exchange_rc_info()\n", i);
     text(log_fp, "PERIODIC RC UPDATE\n");    
     return ud_exchange_rc_info();
 }
@@ -2044,7 +2041,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    debug(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u\n", hdr->type);
+    debug(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2189,14 +2186,11 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             if(res) {
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
-            debug(log_fp, "now hash find int6\n");
+
             HASH_FIND(hh, ep->write_time, &req_id, sizeof(req_id), w_t);
-            debug(log_fp, "now hash find int7\n");
-            if(w_t != NULL) {
-                debug(log_fp, "now hash find int8\n");
+            if(w_t != NULL) {;
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
             }
-            debug(log_fp, "now hash find int9\n");
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
             memset(csm_reply, 0, sizeof(client_rep_t));
             // TODO: you should get the last_req_id from the protocol SM
@@ -2239,7 +2233,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             break;
     }
     /* Send reply */
-    debug(log_fp, "now apply in kvs for request:%d\n", req_id);
+    debug(log_fp, "send reply for request:%d\n", req_id);
     rc = ud_send_message(&ep->ud_ep, len);
     if (0 != rc) {
         error_return(1, log_fp, "Cannot send message over UD to %"PRIu16"\n", 
@@ -2269,11 +2263,11 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     }
     
     if (reply->data.len != 0) {
-        debug(log_fp, "Received data of Request %d : %.*s\n", 
+        debug(log_fp, "Received data of Request %d, size %u : %.*s\n", 
             reply->hdr.id, reply->data.len, reply->data.data);
     }
 
-    info(log_fp, "the Request %d consume %d ns in raft\n", reply->time_raft);
+    info(log_fp, "the Request %d consume %d ns in raft\n",reply->hdr.id, reply->time_raft);
     
     return 0;
 }

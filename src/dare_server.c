@@ -1776,7 +1776,6 @@ commit_new_entries()
     if (log_offset_end_distance(data.log, data.log->commit)) {
         //info_wtime(log_fp, "TRY TO COMMIT NEW ENTRY\n");
         //INFO_PRINT_LOG(log_fp, data.log);
-        debug(log_fp, "now commit new entries\n");
         rc = dare_ib_write_remote_logs(1);
         if (0 != rc) {
             error(log_fp, "Cannot write remote logs\n");
@@ -1816,7 +1815,6 @@ commit_new_entries()
 static void 
 apply_committed_entries()
 {
-    debug(log_fp, "now apply committed entries\n");
     int rc;
     int once = 0;
     
