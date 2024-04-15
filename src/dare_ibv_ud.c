@@ -1556,6 +1556,7 @@ int ud_update_rc_info()
     if (i == size) {
         return 0;
     }
+    debug(log_fp, "now size != %d, so call ud_exchange_rc_info()\n");
     text(log_fp, "PERIODIC RC UPDATE\n");    
     return ud_exchange_rc_info();
 }
@@ -2090,6 +2091,7 @@ send_clt_request( uint32_t len )
     }
     else {
         /* No leader known */
+        debug(log_fp, "send mcast for find leader\n");
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
@@ -2171,7 +2173,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             if(res) {
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
-            
+
             HASH_FIND_INT(ep->write_time, &req_id, w_t);
             if(w_t != NULL) {
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
