@@ -964,7 +964,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    debug(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
+    info(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
 
     /*record time t_s*/
     timeval t_s;
@@ -1082,7 +1082,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    debug(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
+    info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
@@ -1145,7 +1145,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t->id = request->hdr.id;
         w_t->start_time = t_s;
         HASH_ADD(hh, ep->write_time, id, sizeof(request->hdr.id), w_t);
-        info(log_fp, "request%d from %d's time is recorded\n", request->hdr.id, wc->slid);
+        debug(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
         debug(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
@@ -2267,7 +2267,7 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
             reply->hdr.id, reply->data.len, reply->data.data);
     }
 
-    info(log_fp, "the Request %d consume %d ns in raft\n",reply->hdr.id, reply->time_raft);
+    info(log_fp, "the Request %d consume %9.3lf ns in raft\n",reply->hdr.id, reply->time_raft);
     
     return 0;
 }
