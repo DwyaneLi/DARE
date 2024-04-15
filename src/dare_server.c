@@ -1015,6 +1015,7 @@ shutdown:
 static void
 poll_cb( EV_P_ ev_idle *w, int revents )
 {
+    debug(log_fp, "call polling\n");
     polling();  
 }
 
@@ -1030,8 +1031,10 @@ polling()
     }
    
     /* Poll UD connection for incoming messages */
+    debug(log_fp, "call poll_ud\n");
     poll_ud();
-
+    debug(log_fp, "poll_ud back\n");
+    
     if (IS_LEADER) {
         debug(log_fp, "I am leader1!\n");
     } else {
@@ -1153,7 +1156,9 @@ polling()
 static void
 poll_ud()
 {
+    debug(log_fp, "call dare_ib_poll_ud_queue()\n");
     uint8_t type = dare_ib_poll_ud_queue();
+    debug(log_fp, "dare_ib_poll_ud_queue() back\n");
     if (MSG_ERROR == type) {
         error(log_fp, "Cannot get UD message\n");
         dare_server_shutdown();
