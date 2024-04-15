@@ -142,8 +142,6 @@ int ud_init( uint32_t receive_count )
 
     /* init write_time*/
     write_time = NULL;
-    write_time = (write_time_t *)malloc(sizeof *write_time);
-    memset(write_time, 0, sizeof *write_time);
 
     return 0;
 }
@@ -1159,7 +1157,8 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     HASH_FIND_INT(write_time, &tmp_id, w_t);
     info(log_fp, "lalalal2\n");
     if(w_t == NULL) {
-        w_t = (write_time_t *)malloc(sizeof(w_t));
+        w_t = (write_time_t *)malloc(sizeof *w_t);
+        memset(w_t, 0, sizeof *w_t);
         w_t->id = tmp_id;
         w_t->start_time = t_s;
         HASH_ADD_INT(write_time, id, w_t);
