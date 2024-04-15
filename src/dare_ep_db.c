@@ -168,17 +168,6 @@ static void
 free_ep(dare_ep_t *ep)
 {
     ud_ah_destroy(ep->ud_ep.ah);
-
-    /*释放write time*/
-    /*
-    info(log_fp, "free ep\n");
-    write_time_t *current_write, *tmp;
-    HASH_ITER(hh, ep->write_time, current_write, tmp) {
-         HASH_DEL(ep->write_time, current_write);
-         free(current_write);
-    }
-    free(ep->write_time);
-    */
     free(ep);
 }
 
