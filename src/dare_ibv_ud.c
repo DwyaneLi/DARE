@@ -2157,17 +2157,21 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     ep->last_req_id = req_id;
     ep->committed = 1;
     
+    /*FOR TEST*/
+    timeval t_e;
+    int res;
+    write_time_t *w_t;
+
     /* Create reply */
     switch(type) {
-        case CSM: {
+        case CSM: 
             /* Reply to a ClientSM request */
             /*record time t_e*/
-            timeval t_e;
-            int res = gettimeofday(&t_e, NULL);
+            res = gettimeofday(&t_e, NULL);
             if(res) {
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
-            write_time_t *w_t;
+            
             HASH_FIND_INT(ep->write_time, &req_id, w_t);
             if(w_t != NULL) {
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
@@ -2193,8 +2197,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 measure_count = 0;
             }
 #endif             
-            break;
-        }    
+            break;  
         case CONFIG:
             /* Reply to a reconfiguration request */
             psm_reply = (reconf_rep_t*)IBDEV->ud_send_buf;
