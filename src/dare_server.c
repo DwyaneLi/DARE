@@ -1032,6 +1032,12 @@ polling()
     /* Poll UD connection for incoming messages */
     poll_ud();
 
+    if (IS_LEADER) {
+        debug(log_fp, "I am leader1!\n");
+    } else {
+        debug(log_fp, "I am not not leader1!\n");
+    }
+
     if ( (dare_state & RC_ESTABLISHED) && 
         !(dare_state & SM_RECOVERED) ) 
     {
