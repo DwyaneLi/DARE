@@ -2217,6 +2217,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 //info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
                 HASH_DEL(write_time, w_t);
                 free(w_t);
+                info(log_fp, "hash del\n");
             } else {
                 info(log_fp, "set reply %d not find start time raft\n", req_id);
             }
