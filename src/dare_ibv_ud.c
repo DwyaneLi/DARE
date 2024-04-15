@@ -2192,7 +2192,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             if(w_t != NULL) {
                 info(log_fp, "set reply %d time raft\n", req_id);
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
-                HASH_DEL(ep->write_time, w_t);
+                //HASH_DEL(ep->write_time, w_t);
             }
             csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
             memset(csm_reply, 0, sizeof(client_rep_t));
