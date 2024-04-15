@@ -1153,7 +1153,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     
     write_time_t *w_t;
     uint64_t tmp_id = combine_lid_req(request->hdr.id, wc->slid);
-    HASH_FIND(hh, write_time, tmp_id, sizeof(tmp_id), w_t);
+    HASH_FIND(hh, write_time, &tmp_id, sizeof(tmp_id), w_t);
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
         w_t->id = tmp_id;
