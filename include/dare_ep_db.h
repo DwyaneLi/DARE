@@ -38,7 +38,7 @@ struct dare_ep_t {
     uint64_t cid_idx;
     int committed;
     timeval last_req_start_time;
-    write_time_t* write_time;
+    write_time_t *write_time;
 };
 typedef struct dare_ep_t dare_ep_t;
 

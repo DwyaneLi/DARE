@@ -1104,6 +1104,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, wc->slid);
     if (ep ==  NULL) {
         /* No ep with this LID; create a new one */
+        debug(log_fp, "insert new ep\n");
         ep = ep_insert(&SRV_DATA->endpoints, wc->slid);
 //info_wtime(log_fp, "New client\n");        
 #ifdef HISTO_BATCHING
@@ -1139,7 +1140,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     debug(log_fp, "now hash find int1\n");
     write_time_t *w_t;
     debug(log_fp, "now hash find int2\n"); 
-    HASH_FIND_INT(ep->write_time, &request->hdr.id, w_t);
+    HASH_FIND(hh, ep->write_time, &request->hdr.id, sizeof(request->hdr.id), w_t);
     debug(log_fp, "now hash find int3\n");
     if(w_t == NULL) {
         w_t = (write_time_t *)malloc(sizeof(w_t));
@@ -2186,7 +2187,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
 
-            HASH_FIND_INT(ep->write_time, &req_id, w_t);
+            HASH_FIND(hh, ep->write_time, &req_id, sizeof(req_id), w_t);;
             if(w_t != NULL) {
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
             }
