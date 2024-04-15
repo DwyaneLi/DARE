@@ -1137,7 +1137,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
-    /*
+    
     write_time_t *w_t;
     HASH_FIND(hh, ep->write_time, &request->hdr.id, sizeof(request->hdr.id), w_t);
     if(w_t == NULL) {
@@ -1149,7 +1149,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
     }
-    */
+    
 
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
