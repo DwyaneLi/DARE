@@ -1028,6 +1028,7 @@ polling()
     if (dare_state & TERMINATE) {
         dare_server_shutdown();
     }
+   
     /* Poll UD connection for incoming messages */
     poll_ud();
 
@@ -1104,7 +1105,13 @@ polling()
     /* Check the number of failed attempts to access a server 
     through the CTRL QP */
     check_failure_count();
-    
+
+    if (IS_LEADER) {
+        debug(log_fp, "I am leader!\n");
+    } else {
+        debug(log_fp, "I am not not leader!\n");
+    }
+
     if (IS_LEADER) {
         /* Try to commit new log entries */
         commit_new_entries();
