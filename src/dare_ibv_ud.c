@@ -1101,9 +1101,9 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     int res = gettimeofday(&t_s, NULL);
     if(!res) {
         info(log_fp, "request:%d start sec:%ld usec:%ld\n",request->hdr.id, t_s.tv_sec, t_s.tv_usec);
-        error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     } else {
         debug(log_fp, "get request:%d start raft time success\n", request->hdr.id);
+        error(log_fp, "get request:%d start raft time error\n", request->hdr.id);
     }
 
     /* TODO !!!! implement protocol SM that stores clients and their 
@@ -2205,7 +2205,8 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 error(log_fp, "get request:%d end raft time error\n", req_id);
             }
 
-            HASH_FIND_INT(write_time, &req_id, w_t);
+            int tmp_id = combine_lid_req(req_id, lid);
+            HASH_FIND_INT(write_time, &tmp_id, w_t);
             if(w_t != NULL) {
                 info(log_fp, "set reply %d time raft\n", req_id);
                 info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
