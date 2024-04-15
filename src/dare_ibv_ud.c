@@ -1151,7 +1151,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         debug(log_fp, "get request:%d record time fail\n", request->hdr.id);
     }
     debug(log_fp, "now hash find int4\n");
-    
+    debug(log_fp, "now hash find int5\n");
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
