@@ -1031,14 +1031,14 @@ polling()
    
     /* Poll UD connection for incoming messages */
     poll_ud();
-    debug(log-fp, "1\n");
+    debug(log_fp, "1\n");
     if ( (dare_state & RC_ESTABLISHED) && 
         !(dare_state & SM_RECOVERED) ) 
     {
         /* Poll for a SM reply */
         poll_sm_reply();
     }
-    debug(log-fp, "2\n");
+    debug(log_fp, "2\n");
     /* Stop here if not recovered yet */
     if (!(dare_state & LOG_RECOVERED))
         return;
@@ -1096,16 +1096,16 @@ polling()
         }
     }
 #endif
-    debug(log-fp, "3\n");
+    debug(log_fp, "3\n");
     /* Poll for SM requests */
     if (!IS_LEADER) {
         poll_sm_requests();
     }
-    debug(log-fp, "4\n");
+    debug(log_fp, "4\n");
     /* Check the number of failed attempts to access a server 
     through the CTRL QP */
     check_failure_count();
-    debug(log-fp, "5\n");
+    debug(log_fp, "5\n");
     if (IS_LEADER) {
         /* Try to commit new log entries */
         commit_new_entries();
