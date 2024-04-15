@@ -2062,13 +2062,14 @@ int ud_resend_clt_request()
             + ((client_req_t*)IBDEV->ud_send_buf)->cmd.len;
     }
     /* Reset the leader: go back to multicast */
+    /*
     ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
     if (0 != ud_ep->lid) {
         info_wtime(log_fp, "Server %"PRIu16" is unresponsive;"
                     " switch back to mcast\n", ud_ep->lid);
        ud_ep->lid = 0;
     }
-    
+    */
     /* Send request */
     return send_clt_request(len);
 }
