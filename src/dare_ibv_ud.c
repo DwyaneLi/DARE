@@ -1556,7 +1556,7 @@ int ud_update_rc_info()
     if (i == size) {
         return 0;
     }
-    debug(log_fp, "now size != %d, so call ud_exchange_rc_info()\n");
+    debug(log_fp, "now size != %d, so call ud_exchange_rc_info()\n", i);
     text(log_fp, "PERIODIC RC UPDATE\n");    
     return ud_exchange_rc_info();
 }
@@ -1652,7 +1652,7 @@ handle_rc_syn(struct ibv_wc *wc, rc_syn_t *msg)
     qpns[0] = ep->rc_ep.rc_qp[LOG_QP].qp->qp_num;
     qpns[1] = ep->rc_ep.rc_qp[CTRL_QP].qp->qp_num;
     len += 2*sizeof(uint32_t);
-    //info(log_fp, ">> Sending back RC SYNACK msg\n");
+    info(log_fp, ">> Sending back RC SYNACK msg\n");
     rc = ud_send_message(&ep->ud_ep, len);
     if (0 != rc) {
         error_return(1, log_fp, "Cannot send UD message\n");
