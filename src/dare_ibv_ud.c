@@ -1083,7 +1083,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     int rc;
 
     debug(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
-
+    debug(log_fp, "lalalal\n");
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
