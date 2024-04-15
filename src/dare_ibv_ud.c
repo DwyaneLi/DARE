@@ -2229,6 +2229,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             break;
     }
     /* Send reply */
+    debug(log_fp, "now apply in kvs for request:%d\n", req_id);
     rc = ud_send_message(&ep->ud_ep, len);
     if (0 != rc) {
         error_return(1, log_fp, "Cannot send message over UD to %"PRIu16"\n", 
