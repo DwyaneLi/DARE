@@ -1031,7 +1031,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
         error(log_fp, "get request:%d end raft time error\n", request->hdr.id);
     }
     reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
-    info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
+    //info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
@@ -2155,7 +2155,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
         error(log_fp, "get request:%d end raft time error\n", request->hdr.id);
     }
     reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
-    info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
+    //info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
@@ -2211,10 +2211,10 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             int tmp_id = combine_lid_req(req_id, lid);
             HASH_FIND_INT(write_time, &tmp_id, w_t);
             if(w_t != NULL) {
-                info(log_fp, "set reply %d time raft\n", req_id);
-                info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
+                //info(log_fp, "set reply %d time raft\n", req_id);
+                //info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
                 csm_reply->time_raft = (uint64_t)((t_e.tv_sec - w_t->start_time.tv_sec) * 1e6 + (t_e.tv_usec - w_t->start_time.tv_usec));
-                info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
+                //info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
                 //HASH_DEL(write_time, w_t);
                 //free(w_t);
             } else {
