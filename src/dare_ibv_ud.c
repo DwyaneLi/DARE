@@ -1205,7 +1205,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case RC_SYN:
         {
             /* First message of the 3-way handshake protocol */
-            //info(log_fp, ">> Received RC_SYN from lid%"PRIu16"\n", wc->slid);
+            debug(log_fp, ">> Received RC_SYN from client lid%"PRIu16"\n", wc->slid);
             type = MSG_NONE;
             rc = handle_rc_syn(wc, (rc_syn_t*)ud_hdr);
             if (0 != rc) {
