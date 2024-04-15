@@ -142,6 +142,8 @@ int ud_init( uint32_t receive_count )
 
     /* init write_time*/
     write_time = NULL;
+    write_time = (write_time_t *)malloc(sizeof *write_time);
+    memset(write_time, 0, sizeof *write_time);
 
     return 0;
 }
