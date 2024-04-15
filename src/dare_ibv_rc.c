@@ -1815,7 +1815,6 @@ uint64_t wrl_count_array[1000];
 int wrl_idx;
 int rc_write_remote_logs( int wait_for_commit )
 {
-    debug(log_fp, "now rc_write_remote_logs\n");
     int rc;
     int threshold = 0;
     uint64_t ticks;
