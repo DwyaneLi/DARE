@@ -1850,6 +1850,7 @@ apply_committed_entries()
             goto apply_next_entry;
         if (CSM == entry->type) {
             /* Client SM entry */
+            debug(log_fp, "apply entry of request:%d\n", entry->req_id);
             if (entry->req_id != 0) {
                 /* Send reply to the client */
                 rc = dare_ib_send_clt_reply(entry->clt_id, 
