@@ -1221,7 +1221,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case RC_SYNACK:
         {
             /* Second message of the 3-way handshake protocol */
-            //info(log_fp, ">> Received RC_SYNACK from lid%"PRIu16"\n", wc->slid);
+            info(log_fp, ">> Received RC_SYNACK from lid%"PRIu16"\n", wc->slid);
             type = MSG_NONE;
             rc = handle_rc_synack(wc, (rc_syn_t*)ud_hdr);
             if (0 != rc) {
