@@ -1031,7 +1031,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
         error(log_fp, "get request:%d end raft time error\n", request->hdr.id);
     }
     reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
-
+    info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
@@ -2155,7 +2155,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
         error(log_fp, "get request:%d end raft time error\n", request->hdr.id);
     }
     reply->time_raft = (uint64_t)((t_e.tv_sec - t_s.tv_sec) * 1e6 + (t_e.tv_usec - t_s.tv_usec)); 
-
+    info(log_fp, "request:%d start sec:%ld start usec:%ld end sec:%ld end:%ld the reply time is %u\n",reply->hdr.id, t_s.tv_sec, t_s.tv_usec, t_e.tv_sec, t_e.tv_usec, reply->time_raft);
     /* Send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
@@ -2191,6 +2191,9 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     switch(type) {
         case CSM:
         { 
+            csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
+            memset(csm_reply, 0, sizeof(client_rep_t));
+
             /*FOR TEST*/
             
             timeval t_e;
@@ -2218,8 +2221,6 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 info(log_fp, "set reply %d not find start time raft\n", req_id);
             }
 
-            csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
-            memset(csm_reply, 0, sizeof(client_rep_t));
             // TODO: you should get the last_req_id from the protocol SM
             csm_reply->hdr.id = req_id;
             csm_reply->hdr.type = CSM_REPLY;
