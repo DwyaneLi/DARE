@@ -483,7 +483,7 @@ create_request:
     
     /* Schedule timer event to resend request */
     ev_set_cb(w, resend_request_cb);
-    w->repeat = CLT_RETRANS_PERIOD * 50;
+    w->repeat = CLT_RETRANS_PERIOD / 1000.;
     ev_timer_again(EV_A_ w);
 
     repeat_last_cmd = 1;
