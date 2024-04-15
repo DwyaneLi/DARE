@@ -1520,6 +1520,7 @@ int ud_update_rc_info()
     if (i == size) {
         return 0;
     }
+    debug(log_fp, "now size != %u, so call ud_exchange_rc_info()\n", i);
     text(log_fp, "PERIODIC RC UPDATE\n");    
     return ud_exchange_rc_info();
 }
