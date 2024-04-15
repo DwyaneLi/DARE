@@ -1136,7 +1136,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #endif    
 
     /*add start time info in ep*/
-    debug(log_fp, "lalalal\n");
+    debug(log_fp, "now hash find int\n");
     write_time_t *w_t; 
     HASH_FIND_INT(ep->write_time, &request->hdr.id, w_t);
     if(w_t == NULL) {
