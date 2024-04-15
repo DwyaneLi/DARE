@@ -883,10 +883,8 @@ handle_messages:
         /* There is one more message */
         ud_hdr = (ud_hdr_t*)
                 (IBDEV->ud_recv_bufs[wc_array[wc_count-1].wr_id] + 40);
-        if (IBV_SERVER == IBDEV->ulp_type) {
-            debug(log_fp, "call handle_message_from_client()\n");
+        if (IBV_SERVER == IBDEV->ulp_type) {           
             type = handle_message_from_client(&wc_array[wc_count-1], ud_hdr);
-            debug(log_fp, "handle_message_from_client() back\n");
         }
         else if (IBV_CLIENT == IBDEV->ulp_type) {
             type = handle_message_from_server(&wc_array[wc_count-1], ud_hdr);
@@ -1287,9 +1285,7 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
             text_wtime(log_fp, "CLIENT WRITE REQUEST %"PRIu64" (lid%"PRIu16")\n", 
                         ud_hdr->id, wc->slid);
             /* Handle request */
-            debug(log_fp, "call handle_one_csm_write_request\n");
             handle_one_csm_write_request(wc, (client_req_t*)ud_hdr);
-            debug(log_fp, "handle_one_csm_write_request() back\n");
             break;
         }
         case DOWNSIZE:

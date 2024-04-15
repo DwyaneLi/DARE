@@ -1015,7 +1015,6 @@ shutdown:
 static void
 poll_cb( EV_P_ ev_idle *w, int revents )
 {
-    debug(log_fp, "call polling\n");
     polling();  
 }
 
@@ -1031,15 +1030,7 @@ polling()
     }
    
     /* Poll UD connection for incoming messages */
-    debug(log_fp, "call poll_ud\n");
     poll_ud();
-    debug(log_fp, "poll_ud back\n");
-    
-    if (IS_LEADER) {
-        debug(log_fp, "I am leader1!\n");
-    } else {
-        debug(log_fp, "I am not not leader1!\n");
-    }
 
     if ( (dare_state & RC_ESTABLISHED) && 
         !(dare_state & SM_RECOVERED) ) 
@@ -1116,12 +1107,6 @@ polling()
     check_failure_count();
 
     if (IS_LEADER) {
-        debug(log_fp, "I am leader!\n");
-    } else {
-        debug(log_fp, "I am not not leader!\n");
-    }
-
-    if (IS_LEADER) {
         /* Try to commit new log entries */
         commit_new_entries();
     }
@@ -1156,9 +1141,7 @@ polling()
 static void
 poll_ud()
 {
-    debug(log_fp, "call dare_ib_poll_ud_queue()\n");
     uint8_t type = dare_ib_poll_ud_queue();
-    debug(log_fp, "dare_ib_poll_ud_queue() back\n");
     if (MSG_ERROR == type) {
         error(log_fp, "Cannot get UD message\n");
         dare_server_shutdown();
@@ -1788,7 +1771,7 @@ static void
 commit_new_entries()
 {
     int rc;
- 
+    debug(log_fp, "now commit new entries\n");
     if (log_offset_end_distance(data.log, data.log->commit)) {
         //info_wtime(log_fp, "TRY TO COMMIT NEW ENTRY\n");
         //INFO_PRINT_LOG(log_fp, data.log);
