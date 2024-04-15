@@ -1813,6 +1813,7 @@ commit_new_entries()
 static void 
 apply_committed_entries()
 {
+    debug(log_fp, "now apply committed entries\n");
     int rc;
     int once = 0;
     
