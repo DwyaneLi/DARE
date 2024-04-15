@@ -1158,7 +1158,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
         w_t = (write_time_t *)malloc(sizeof(w_t));
         w_t->id = tmp_id;
         w_t->start_time = t_s;
-        //HASH_ADD(hh, write_time, id, sizeof(tmp_id), w_t);
+        HASH_ADD(hh, write_time, id, sizeof(tmp_id), w_t);
         info(log_fp, "request %d from %d's time is recorded\n", request->hdr.id, wc->slid);
     } else {
         info(log_fp, "get request:%d record time fail, already has one\n", request->hdr.id);
