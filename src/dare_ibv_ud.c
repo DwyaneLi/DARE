@@ -964,6 +964,8 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
+    debug(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
+
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
@@ -1079,6 +1081,8 @@ static void
 handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
+
+    debug(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
 
     /*record time t_s*/
     timeval t_s;
@@ -1249,8 +1253,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case CSM_READ:
         {
             /* Read request from a client */
-            //info(log_fp, ">> Received read request from a client with lid%"
-            //    PRIu16"\n", wc->slid);
+            debug(log_fp, ">> Received read request from a client with lid%u"
+                PRIu16"\n", wc->slid);
             if (!is_leader()) {
                 /* Ignore request */
                 break;
@@ -1264,8 +1268,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case CSM_WRITE:
         {
             /* Write request from a client */
-            //info(log_fp, ">> Received write request from a client with lid%"
-            //    PRIu16"\n", wc->slid);
+            debug(log_fp, ">> Received write request from a client with lid%u"
+                PRIu16"\n", wc->slid);
             if (!is_leader()) {
                 /* Ignore request */
                 break;
