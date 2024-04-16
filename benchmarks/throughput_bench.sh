@@ -66,6 +66,7 @@ StopDare() {
     done
 }
 
+# 在多个机器上开client进程
 StartClients() {
     # Create trace file - the same for each client
     cmd=( "rm -f $trace_file" )
@@ -148,6 +149,7 @@ fi
 
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
+# 前面
 nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
 node_count=${#nodes[@]}
 echo "Allocated ${node_count} nodes:" > nodes
@@ -189,7 +191,7 @@ trap 'echo -ne "Stop all servers..." && StopClients && StopDare && echo "done" &
 
 # mckey program is used to generate a dgid that provides the required multicast address
 echo 'executing mckey, please wait ...'
-MCKEY_M=`ip addr show ib0 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'|cut -d/ -f1`
+MCKEY_M=`ip addr show ibs5 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'|cut -d/ -f1`
 mckey -m $MCKEY_M > mckey_dump &
 mckey -m $MCKEY_M -s > /dev/null
 DGID=`cat mckey_dump | grep 'dgid'| cut -d " " -f4`
@@ -206,6 +208,7 @@ sleep 2
 # Write entry in the SM
 tmp_tfile="$PWD/tmp.trace"
 tmp_dfile="$PWD/tmp.data"
+# 先写一点放到本地SM，不太懂为啥要先这样
 cmd=( "${DAREDIR}/bin/kvs_trace" "--loop" "--put" "-s ${blob_size}" "-o ${tmp_tfile}" )
 ${cmd[@]}
 cmd=( "${DAREDIR}/bin/clt_test" "--trace" "-t $tmp_tfile" "-o $tmp_dfile" "-l write.log" "-m $DGID" )
