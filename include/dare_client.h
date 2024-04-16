@@ -55,7 +55,7 @@ struct dare_client_data_t {
     FILE                *output_fp;
     dare_sm_t           *sm;        // local state machine
     HRT_TIMESTAMP_T     t1, t2;
-    uint64_t            *raft_time // record consume time in server raft
+    uint64_t            *raft_time; // record consume time in server raft          
 };
 typedef struct dare_client_data_t dare_client_data_t;
 

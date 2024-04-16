@@ -456,6 +456,7 @@ repeat_trace:
     if (measure_count == MEASURE_COUNT) {
         /* First print the latency of this command */
         qsort(ticks, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
+        qsort(data.raft_time, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
         fprintf(data.output_fp, "request all cosume:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
             fprintf(data.output_fp, "%9.3lf\t", HRT_GET_USEC(ticks[i]));
@@ -468,7 +469,7 @@ repeat_trace:
         for (i = 0; i < MEASURE_COUNT; i++) {
             fprintf(data.output_fp, "%9.3lf\t", (double)(data.raft_time[i])/(HRT_GET_USEC(ticks[i])));
         }
-        fprintf(data.output_fp, "\n");
+        fprintf(data.output_fp, "\n\n");
         /* How to get the median */
         //int median_index = MEASURE_COUNT/2;
         //usecs = HRT_GET_USEC(ticks[median_index]);
