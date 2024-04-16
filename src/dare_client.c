@@ -192,6 +192,10 @@ init_client_data()
     /* No leader at the moment */
     data.leader_ep = NULL;
     
+    /* allocate memory for raft_time*/
+    data.raft_time = NULL;
+    data.raft_time = (uint64_t*)malloc(MEASURE_COUNT * sizeof(uint64_t));
+    memset(data.raft_time, 0, sizeof(data.raft_time));
     return 0;
 }
 
@@ -216,6 +220,11 @@ free_client_data()
     if (NULL != data.leader_ep) {
         free(data.leader_ep);
         data.leader_ep = NULL;
+    }
+
+    if (NULL != data.raft_time) {
+        free(data.raft_time);
+        data.raft_time = NULL;
     }
 }
 
@@ -447,8 +456,17 @@ repeat_trace:
     if (measure_count == MEASURE_COUNT) {
         /* First print the latency of this command */
         qsort(ticks, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
+        fprintf(data.output_fp, "request all cosume:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
-            fprintf(data.output_fp, "%9.3lf ", HRT_GET_USEC(ticks[i]));
+            fprintf(data.output_fp, "%9.3lf\t", HRT_GET_USEC(ticks[i]));
+        }
+        fprintf(data.output_fp, "\nraft cosume:\n");
+        for (i = 0; i < MEASURE_COUNT; i++) {
+            fprintf(data.output_fp, "%u\t", data.raft_time[i]);
+        }
+        fprintf(data.output_fp, "\nmedian occupy\n");
+        for (i = 0; i < MEASURE_COUNT; i++) {
+            fprintf(data.output_fp, "%9.3lf\t", (double)data.raft_time[i]/HRT_GET_USEC(ticks[i]));
         }
         fprintf(data.output_fp, "\n");
         /* How to get the median */

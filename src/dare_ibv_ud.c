@@ -33,6 +33,10 @@ extern FILE *log_fp;
 /* InfiniBand device */
 extern dare_ib_device_t *dare_ib_device;
 
+/*for test*/
+int raft_time_count;
+#define RAFT_TIME_COUNT 3 //same with dare_client.c MEASURE_COUNT
+
 /* global_mgid is an IPV6 multicast address */
 char* global_mgid;
 
@@ -2296,8 +2300,10 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
             reply->hdr.id, reply->data.len, reply->data.data);
     }
 
-    info(log_fp, "the Request:%d type:%d consume %u ns in raft\n",reply->hdr.id, reply->hdr.type, reply->time_raft);
     
+    info(log_fp, "the Request:%d type:%d consume %u ns in raft\n",reply->hdr.id, reply->hdr.type, reply->time_raft);
+    CLT_DATA->raft_time[raft_time_count] = reply->time_raft;
+    raft_time_count = (raft_time_count + 1) % RAFT_TIME_COUNT;
     return 0;
 }
 
