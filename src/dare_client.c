@@ -462,11 +462,11 @@ repeat_trace:
         }
         fprintf(data.output_fp, "\nraft cosume:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
-            fprintf(data.output_fp, "%u\t", data.raft_time[i]);
+            fprintf(data.output_fp, "%9.3lf\t", data.raft_time[i]);
         }
-        fprintf(data.output_fp, "\nmedian occupy\n");
+        fprintf(data.output_fp, "\noccupy:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
-            fprintf(data.output_fp, "%9.3lf\t", (double)data.raft_time[i]/HRT_GET_USEC(ticks[i]));
+            fprintf(data.output_fp, "%9.3lf\t", (double)(data.raft_time[i])/HRT_GET_USEC(ticks[i]));
         }
         fprintf(data.output_fp, "\n");
         /* How to get the median */
