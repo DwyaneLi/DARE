@@ -1996,7 +1996,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    //info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2125,7 +2125,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             csm_reply->hdr.type = CSM_REPLY;
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            info(log_fp, "set reply %d\n", req_id);
+            //info(log_fp, "set reply %d\n", req_id);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
@@ -2175,7 +2175,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 static int 
 handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
 {
-    info(log_fp, "Received the reply of request%d\n", reply->hdr.id);
+    //info(log_fp, "Received the reply of request%d\n", reply->hdr.id);
     if (reply->hdr.id < IBDEV->request_id) {
         /* Old reply; ignore */
         return 0;
