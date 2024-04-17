@@ -22,12 +22,13 @@
 //#define MIN_DATA_LEN 8
 #define MIN_DATA_LEN 8
 #define MAX_DATA_LEN 1024
+#define BALANCE_COUNT 100
 
 void usage( char *prog )
 {
     printf("Usage: %s [OPTIONS]\n"
             "OPTIONS:\n"
-            "\t--loop | --trace  (CLT type; default trace)\n"
+            "\t--loop | --trace | balance (CLT type; default trace)\n"
             "\t--put | --get     (CMD type for loop)\n"
             "\t-s <size>         (data size in bytes for loop)\n"
             "\t-o <output>       (output file)\n",
@@ -47,6 +48,7 @@ int main(int argc, char* argv[])
             /* These options set the type of the client */
             {"loop", no_argument, &loop, 1},
             {"trace", no_argument, &loop, 0},
+            {"balance", no_argument, &loop, 2},
             /* These options set the type of the op */
             {"put", no_argument, &put, 1},
             {"get",  no_argument, &put, 0},
@@ -123,7 +125,7 @@ int main(int argc, char* argv[])
     kvs_cmd_t kvs_cmd;
     char data[MAX_DATA_LEN];
     memset(data, 'x', MAX_DATA_LEN);
-    if (loop) {
+    if (loop == 1) {
         /* Add a write so that the read can work */
         //type = CSM_WRITE;
         //kvs_cmd.type = KVS_PUT;
@@ -181,6 +183,74 @@ int main(int argc, char* argv[])
 
         goto end;
     }
+
+   /*add mode balance: wirte-read(50%-50)*/
+     if (loop == 2) {
+        /* Add a write so that the read can work */
+        //type = CSM_WRITE;
+        //kvs_cmd.type = KVS_PUT;
+        //memset(kvs_cmd.key, 0, KEY_SIZE);
+        //sprintf(kvs_cmd.key, "key%"PRIu16, data_size);
+        //kvs_cmd.len = data_size;
+        //fwrite(&type, 1, 1, fp);
+        //fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+        //fwrite(data, kvs_cmd.len, 1, fp);
+        /* Add just one command */
+
+        printf("now in mode balance!\n");
+        int counter;
+        if (put) {
+            for(counter = 0; counter < BALANCE_COUNT; counter++) {
+                type = CSM_WRITE;
+                kvs_cmd.type = KVS_PUT;
+                memset(kvs_cmd.key, 0, KEY_SIZE);
+                sprintf(kvs_cmd.key, "key%"PRIu16, data_size);
+                kvs_cmd.len = data_size;
+                fwrite(&type, 1, 1, fp);
+                fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+                fwrite(data, kvs_cmd.len, 1, fp);
+            /*printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
+              (type == CSM_READ) ? "READ" : "WRITE", 
+              (kvs_cmd.type == KVS_PUT) ? "PUT" : 
+              (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
+                kvs_cmd.key, kvs_cmd.len); */
+                type = CSM_READ;
+                kvs_cmd.type = KVS_GET;
+                memset(kvs_cmd.key, 0, KEY_SIZE);
+                sprintf(kvs_cmd.key, "key%"PRIu16, data_size);
+                kvs_cmd.len = 0;
+                fwrite(&type, 1, 1, fp);
+                fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+            }
+        }
+        else {
+            for(counter = 0; counter < BALANCE_COUNT; counter++) {
+                type = CSM_READ;
+                kvs_cmd.type = KVS_GET;
+                memset(kvs_cmd.key, 0, KEY_SIZE);
+                sprintf(kvs_cmd.key, "key%"PRIu16, data_size);
+                kvs_cmd.len = 0;
+                fwrite(&type, 1, 1, fp);
+                fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+                /*printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
+                  (type == CSM_READ) ? "READ" : "WRITE", 
+                  (kvs_cmd.type == KVS_PUT) ? "PUT" : 
+                  (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
+                    kvs_cmd.key, kvs_cmd.len);*/
+                type = CSM_WRITE;
+                kvs_cmd.type = KVS_PUT;
+                memset(kvs_cmd.key, 0, KEY_SIZE);
+                sprintf(kvs_cmd.key, "key%"PRIu16, data_size);
+                kvs_cmd.len = data_size;
+                fwrite(&type, 1, 1, fp);
+                fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+                fwrite(data, kvs_cmd.len, 1, fp);
+                fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+            }
+        }
+
+        goto end;
+    }   
     
     uint16_t size = MIN_DATA_LEN;
     for (;size <= MAX_DATA_LEN; size <<= 1) {
