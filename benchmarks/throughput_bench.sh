@@ -68,12 +68,12 @@ StopDare() {
 
 StartClients() {
     # Create trace file - the same for each client
-    cmd=( "rm -f $trace_file" )
-    echo "Executing: ${cmd[@]}"
-    ${cmd[@]}
-    cmd=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
-    echo "Executing: ${cmd[@]}"
-    ${cmd[@]}
+    #cmd=( "rm -f $trace_file" )
+    #echo "Executing: ${cmd[@]}"
+    #${cmd[@]}
+    #cmd=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
+    #echo "Executing: ${cmd[@]}"
+    #${cmd[@]}
 
     for i in "${!clients[@]}"; do
         # Start client
@@ -102,10 +102,24 @@ StopClients() {
     done
 }
 
+CreatrTraceForClients() {
+    echo "create trace for clients"
+    for i in "${clients[@]}"; do
+        create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
+        cmd=("ssh" "$USER@$i" "rm -f $trace_file")
+        echo "Executing: ${cmd[@]}"
+        ${cmd[@]}
+        cmd=("ssh" "$USER@$i" "${create_trace[@]}")
+        echo "Executing: ${cmd[@]}"
+        ${cmd[@]}
+    done    
+}
+
+echo "start!"
 DAREDIR=""
 OPCODE="put"
 server_count=3
-client_count=1
+client_count=2
 blob_size=64
 proc=100
 for arg in "$@"
@@ -141,7 +155,6 @@ do
         proc=`eval echo ${proc}`    # tilde and variable expansion
     esac
 done
-
 if [[ "x$DAREDIR" == "x" ]]; then
     ErrorAndExit "No DARE folder defined: --dare."
 fi
@@ -150,6 +163,7 @@ fi
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
 nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
 node_count=${#nodes[@]}
+echo "allocate nodes"
 echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
     echo "$i:${nodes[$i]}" >> nodes
@@ -213,6 +227,7 @@ cmd=( "${DAREDIR}/bin/clt_test" "--trace" "-t $tmp_tfile" "-o $tmp_dfile" "-l wr
 ${cmd[@]}
 rm ${tmp_tfile} ${tmp_dfile}
 
+CreatrTraceForClients
 StartClients
 StopClients
 
