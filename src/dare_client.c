@@ -292,7 +292,7 @@ init_network_cb( EV_P_ ev_timer *w, int revents )
         ev_timer_again(EV_A_ w);
         /* Schedule output event to periodically output the number of requests */
         ev_set_cb(&output_event, output_cb);
-        output_event.repeat = CLT_OUTPUT_PERIOD / 1000.;
+        output_event.repeat = CLT_OUTPUT_PERIOD / 1000.; // 0.01
         while((int)(ev_now(EV_A) * 1000000) % CLT_OUTPUT_PERIOD == 0);
         ev_timer_again(EV_A_ &output_event);
     }
