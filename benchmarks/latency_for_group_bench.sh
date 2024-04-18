@@ -116,7 +116,7 @@ echo "start!"
 DAREDIR=""
 OPCODE="put"
 server_count=3
-client_count=2
+client_count=4
 blob_size=64
 proc=100
 for arg in "$@"
@@ -158,7 +158,8 @@ fi
 
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
-nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
+# nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
+nodes=(`cat $PBS_NODEFILE | tr ' ' '\n'`)
 node_count=${#nodes[@]}
 echo "allocate nodes"
 echo "Allocated ${node_count} nodes:" > nodes
