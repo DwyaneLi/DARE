@@ -119,7 +119,7 @@ echo "start!"
 DAREDIR=""
 OPCODE="put"
 server_count=3
-client_count=2
+client_count=1
 blob_size=64
 proc=100
 for arg in "$@"
@@ -229,6 +229,7 @@ rm ${tmp_tfile} ${tmp_dfile}
 
 CreatrTraceForClients
 StartClients
+sleep 10
 StopClients
 
 sleep 0.2
