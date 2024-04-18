@@ -427,7 +427,7 @@ ud_qp_create()
     init_attr.cap.max_recv_sge    = 1;
     init_attr.cap.max_recv_wr = IBDEV->ud_rcqe;
     init_attr.cap.max_send_wr = IBDEV->ud_rcqe;
-
+    info(log_fp, "max_recv_wr:%d\n", init_attr.cap.max_recv_wr);
     qp = ibv_create_qp(IBDEV->ud_pd, &init_attr); 
     if (NULL == qp) {
         error_return(1, log_fp, "Could not create UD listen queue pair: %s  max inline data: %d  max send wr: %d\n", strerror(errno), init_attr.cap.max_inline_data, init_attr.cap.max_send_wr);
