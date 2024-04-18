@@ -67,7 +67,7 @@ StopDare() {
 
 DAREDIR=""
 OPCODE="put"
-server_count=9
+server_count=12
 
 for arg in "$@"
 do
