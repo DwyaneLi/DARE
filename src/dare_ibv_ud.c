@@ -261,7 +261,7 @@ ud_prerequisite( uint32_t receive_count )
     }
     
     /* Create UD completion queues */
-    IBDEV->ud_rcqe = receive_count * 100;
+    IBDEV->ud_rcqe = receive_count * 10;
     IBDEV->ud_rcq = ibv_create_cq(IBDEV->ib_dev_context, 
                    IBDEV->ud_rcqe, NULL, NULL, 0);
     if (NULL == IBDEV->ud_rcq) {
