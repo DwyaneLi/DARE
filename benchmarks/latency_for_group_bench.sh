@@ -60,7 +60,7 @@ StartDare() {
 StopDare() {
     for i in "${!pids[@]}"
     do
-        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${pids[$i]}" )
+        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${pids[$i]}" "&" "pkill srv_test" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
     done
@@ -96,7 +96,7 @@ StopClients() {
     #IFS=$'\n' sorted_cpids=($(sort <<<"${tmp[*]}"))
     #for i in "${sorted_cpids[@]}"; do
     for i in "${clients[@]}"; do
-        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${cpids[$i]}" )
+        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${cpids[$i]}" "&" "pkill clt_test")
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
     done
@@ -115,8 +115,8 @@ CreatrTraceForClients() {
 echo "start!"
 DAREDIR=""
 OPCODE="put"
-server_count=3
-client_count=4
+server_count=9
+client_count=6
 blob_size=64
 proc=100
 for arg in "$@"

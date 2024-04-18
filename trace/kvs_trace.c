@@ -214,7 +214,6 @@ int main(int argc, char* argv[])
               (kvs_cmd.type == KVS_PUT) ? "PUT" : 
               (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
                 kvs_cmd.key, kvs_cmd.len); 
-            }
                 type = CSM_READ;
                 kvs_cmd.type = KVS_GET;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
@@ -226,7 +225,8 @@ int main(int argc, char* argv[])
               (type == CSM_READ) ? "READ" : "WRITE", 
               (kvs_cmd.type == KVS_PUT) ? "PUT" : 
               (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                kvs_cmd.key, kvs_cmd.len); 
+                kvs_cmd.key, kvs_cmd.len);
+            } 
         }
         else {
             for(counter = 0; counter < BALANCE_COUNT; counter++) {
@@ -242,7 +242,6 @@ int main(int argc, char* argv[])
                   (kvs_cmd.type == KVS_PUT) ? "PUT" : 
                   (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
                     kvs_cmd.key, kvs_cmd.len);
-            }
                 type = CSM_WRITE;
                 kvs_cmd.type = KVS_PUT;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
@@ -252,6 +251,7 @@ int main(int argc, char* argv[])
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
                 fwrite(data, kvs_cmd.len, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+            }
         }
 
         goto end;

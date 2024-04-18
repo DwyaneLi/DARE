@@ -981,7 +981,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    info(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
+    //info(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
 
     /*record time t_s*/
     timeval t_s;
