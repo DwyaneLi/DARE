@@ -87,7 +87,7 @@ StartClients() {
         cmd=( "ssh" "$USER@${clients[$i]}" "nohup" "${run_loop[@]}" "${redirection[@]}" "&" "echo \$!" )
         cpids[${clients[$i]}]=$("${cmd[@]}")
         echo "COMMDAND: ${cmd[@]}"
-        sleep 1
+        #sleep 1
     done
 }
 
@@ -226,6 +226,7 @@ rm ${tmp_tfile} ${tmp_dfile}
 
 CreatrTraceForClients
 StartClients
+sleep 10
 StopClients
 
 sleep 0.2
