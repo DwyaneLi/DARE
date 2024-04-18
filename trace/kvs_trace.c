@@ -22,7 +22,7 @@
 //#define MIN_DATA_LEN 8
 #define MIN_DATA_LEN 8
 #define MAX_DATA_LEN 1024
-#define BALANCE_COUNT 100
+#define BALANCE_COUNT 1000
 
 void usage( char *prog )
 {
@@ -209,11 +209,7 @@ int main(int argc, char* argv[])
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
                 fwrite(data, kvs_cmd.len, 1, fp);
-            printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
-              (type == CSM_READ) ? "READ" : "WRITE", 
-              (kvs_cmd.type == KVS_PUT) ? "PUT" : 
-              (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                kvs_cmd.key, kvs_cmd.len); 
+
                 type = CSM_READ;
                 kvs_cmd.type = KVS_GET;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
@@ -221,11 +217,6 @@ int main(int argc, char* argv[])
                 kvs_cmd.len = 0;
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
-            printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
-              (type == CSM_READ) ? "READ" : "WRITE", 
-              (kvs_cmd.type == KVS_PUT) ? "PUT" : 
-              (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                kvs_cmd.key, kvs_cmd.len);
             } 
         }
         else {
@@ -237,11 +228,7 @@ int main(int argc, char* argv[])
                 kvs_cmd.len = 0;
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
-                printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
-                  (type == CSM_READ) ? "READ" : "WRITE", 
-                  (kvs_cmd.type == KVS_PUT) ? "PUT" : 
-                  (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                    kvs_cmd.key, kvs_cmd.len);
+
                 type = CSM_WRITE;
                 kvs_cmd.type = KVS_PUT;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
