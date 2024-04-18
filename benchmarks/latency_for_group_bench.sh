@@ -79,10 +79,10 @@ StartClients() {
         # Start client
         if [[ "x${proc}" == "x" ]]; then
             data_files[$i]="$PWD/data/loop_req_${OPCODE}_${blob_size}b_c${i}.data"
-            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID")
+            run_loop=( "${DAREDIR}/bin/clt_test" "--rtrace" "-t ${trace_file}" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID")
         else 
             data_files[$i]="$PWD/data/loop_req_${OPCODE}_p${proc}_${blob_size}b_c${i}.data"
-            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}" "-p $proc" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID" )
+            run_loop=( "${DAREDIR}/bin/clt_test" "--rtrace" "-t ${trace_file}" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID" )
         fi
         cmd=( "ssh" "$USER@${clients[$i]}" "nohup" "${run_loop[@]}" "${redirection[@]}" "&" "echo \$!" )
         cpids[${clients[$i]}]=$("${cmd[@]}")
@@ -105,11 +105,8 @@ StopClients() {
 CreatrTraceForClients() {
     echo "create trace for clients"
     for i in "${clients[@]}"; do
-        create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
-        cmd=("ssh" "$USER@$i" "rm -f $trace_file")
-        echo "Executing: ${cmd[@]}"
-        ${cmd[@]}
-        cmd=("ssh" "$USER@$i" "${create_trace[@]}")
+        create_trace=( "${DAREDIR}/bin/kvs_trace" "--balance" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
+        cmd=("ssh" "$USER@$i" "rm -f $trace_file" "&" "${create_trace[@]}")
         echo "Executing: ${cmd[@]}"
         ${cmd[@]}
     done    

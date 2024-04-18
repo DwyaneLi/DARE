@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     uint8_t type;
     kvs_cmd_t kvs_cmd;
     char data[MAX_DATA_LEN];
-    memset(data, 'x', MAX_DATA_LEN);
+    memset(data, 'a', MAX_DATA_LEN);
     if (loop == 1) {
         /* Add a write so that the read can work */
         //type = CSM_WRITE;
@@ -209,11 +209,11 @@ int main(int argc, char* argv[])
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
                 fwrite(data, kvs_cmd.len, 1, fp);
-            /*printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
+            printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
               (type == CSM_READ) ? "READ" : "WRITE", 
               (kvs_cmd.type == KVS_PUT) ? "PUT" : 
               (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                kvs_cmd.key, kvs_cmd.len); */
+                kvs_cmd.key, kvs_cmd.len); 
                 type = CSM_READ;
                 kvs_cmd.type = KVS_GET;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
@@ -221,6 +221,11 @@ int main(int argc, char* argv[])
                 kvs_cmd.len = 0;
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
+            printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
+              (type == CSM_READ) ? "READ" : "WRITE", 
+              (kvs_cmd.type == KVS_PUT) ? "PUT" : 
+              (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
+                kvs_cmd.key, kvs_cmd.len); 
             }
         }
         else {
@@ -232,11 +237,11 @@ int main(int argc, char* argv[])
                 kvs_cmd.len = 0;
                 fwrite(&type, 1, 1, fp);
                 fwrite(&kvs_cmd, sizeof(kvs_cmd_t), 1, fp);
-                /*printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
+                printf("CMD: [%s] %s key=%s; data len=%"PRIu16"\n", 
                   (type == CSM_READ) ? "READ" : "WRITE", 
                   (kvs_cmd.type == KVS_PUT) ? "PUT" : 
                   (kvs_cmd.type == KVS_GET) ? "GET" : "RM", 
-                    kvs_cmd.key, kvs_cmd.len);*/
+                    kvs_cmd.key, kvs_cmd.len);
                 type = CSM_WRITE;
                 kvs_cmd.type = KVS_PUT;
                 memset(kvs_cmd.key, 0, KEY_SIZE);
