@@ -475,6 +475,7 @@ int rc_get_replicated_vote()
 
 /**
  * Server recovery: Send request to get a snapshot of the SM
+ * IBD_WR_RDMA_WRITE
  */
 int rc_send_sm_request()
 {
@@ -866,6 +867,7 @@ int rc_recover_log()
 /**
  * Send HB over RDMA (HB = cached SID)
  * Only leaders and candidates do this
+ * 把自己的sid写到别的server的hb中自己的那个idx的位置上
  */
 int rc_send_hb()
 {
@@ -916,6 +918,7 @@ int rc_send_hb()
 /**
  * Send HB Reply over RDMA (HB = cached SID)
  * Done when receiving an outdated HB
+ * 把自己的sid写到idx对应的server的hb中自己的那个idx的位置上
  */
 int rc_send_hb_reply( uint8_t idx )
 {
@@ -967,6 +970,7 @@ int rc_send_hb_reply( uint8_t idx )
 /**
  * Send vote requests to the other servers; that is,
  * write SID, index & term of last log entry
+ * 发送投票请求， RDMA WRITE
  */
 int rc_send_vote_request()
 {
@@ -1047,6 +1051,8 @@ int rc_send_vote_request()
 /**
  * Replicate SID of a the candidate that receives my vote;
  * future SIDs of this index cannot be lower than the replicated SID
+ * 把自己的SID写到投票的candidate的prv_data_t的vote_sid里，但是它里面好像给所有人都发了
+ * 并且会把自己的vote_sid设为sid
  */
 int rc_replicate_vote()
 {
