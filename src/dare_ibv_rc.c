@@ -1296,6 +1296,7 @@ int rc_verify_leadership( int *leader )
  *  - read the not committed entries
  *  - find offset of first non-matching entry and update remote end offset
  * Note: only the leader calls this function
+ * 这个函数是leader用于修建其他server的entry，先获取其他server的ncbuf,然后把end设置到和自己最后相同的那一条
  */
 static int
 log_adjustment()
