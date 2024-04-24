@@ -2652,6 +2652,7 @@ empty_completion_queue( uint8_t server_id,
                     }
                     if (conn == server_id) {
                         /* This is the signaled WR we were waiting for */
+                        // 找到了那个等的signaled wr_id
                         wait_signaled_wr = 0;
                     }
                 }
@@ -2720,6 +2721,7 @@ from the queues. */
 /**
  * Wait for a majority of success array entries to be set
  * @param posted_sends array with number of posted sends per server
+ * 所有发的send消息中，半数成功了就返回成功
  */
 static int
 wait_for_majority( int *posted_sends, int qp_id )
@@ -2919,6 +2921,7 @@ wait_for_majority( int *posted_sends, int qp_id )
     return RC_INSUCCESS;
 }
 
+// 所有发的send消息中，有一个成功了就返回成功
 static int
 wait_for_one( int *posted_sends, int qp_id )
 {
@@ -3130,6 +3133,7 @@ handle_lr_work_completion( uint8_t idx, int wc_rc )
                     case 0:
                     case 1:
                         /* The update was unsuccessful */
+                        // 不改变next_lr_step
                         server->send_flag = 1;
                         break;
                     case 2:
@@ -3154,6 +3158,7 @@ handle_lr_work_completion( uint8_t idx, int wc_rc )
 
 /**
  * Handle the completion status of a WC 
+ * 对wc的异常处理
  */
 static int
 handle_work_completion( struct ibv_wc *wc, int qp_id )
