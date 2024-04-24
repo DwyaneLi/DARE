@@ -1693,6 +1693,7 @@ else {
 #if 1
         //sprintf(posted_sends_str, "%s sort", posted_sends_str);
         /* Sort offsets in ascending order */
+        // 对offset进行插入排序
         uint64_t tmp; int k;
         for (i = 1; i < size; i++) {
             tmp = offsets[i];
@@ -1734,6 +1735,7 @@ info(log_fp, "%s\n", buf);
     if (log_is_offset_larger(SRV_DATA->log, min_offset, SRV_DATA->log->commit)) {
     //if (SRV_DATA->log->commit < min_offset) {
         /* Update local commit offset... */ 
+        // 更新leader上的commit
         SRV_DATA->log->commit = min_offset;
 //uint64_t ticks;
 //HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks);
@@ -1748,6 +1750,7 @@ info(log_fp, "%s\n", buf);
     }
     
     /* Try to update the commit offsets */
+    // 更新follower身上的commit
     for (init = 0, i = 0; i < size; i++) {
         if ( (i == SRV_DATA->config.idx) ||
             !CID_IS_SERVER_ON(SRV_DATA->config.cid, i) )
@@ -1919,6 +1922,7 @@ cmpfunc_offset( const void *a, const void *b )
  * Note: do not wait for the reads to complete;
  * yet, we must avoid having more than IBDEV->ib_dev_attr.max_qp_rd_atom
  * outstanding read operations 
+ * 只给给他投票的server发
  */
 int rc_get_remote_apply_offsets()
 {
@@ -2105,6 +2109,7 @@ int rc_connect_server( uint8_t idx, int qp_id )
 /**
  * Revoke remote log access; that is, 
  * move all log QPs to RESET state: *->RESET
+ * 撤回所有server对本地日志的访问权限
  */
 int rc_revoke_log_access()
 {
@@ -2144,6 +2149,7 @@ int rc_revoke_log_access()
 /**
  * Grant remote log access to the leader; that is, 
  * move log QP to RTS state: RESET->INIT->RTR->RTS
+ * 重新赋予对leader的远程日志访问
  */
 int rc_restore_log_access()
 {
