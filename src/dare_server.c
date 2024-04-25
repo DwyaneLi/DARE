@@ -854,6 +854,7 @@ hb_receive_cb( EV_P_ ev_timer *w, int revents )
 
     uint8_t leader = SID_GET_IDX(data.ctrl_data->sid);
     new_sid = data.ctrl_data->sid;
+    // 看别的server有没有往你这个使用rdma写操作写hb。
     for (i = 0; i < size; i++) {
         if ( (i == data.config.idx) || !CID_IS_SERVER_ON(data.config.cid, i) )
             continue;
@@ -898,7 +899,7 @@ hb_receive_cb( EV_P_ ev_timer *w, int revents )
         }
     }
 //text(log_fp, "\n");    
-    
+    // 如果没人发心跳，就说明超时了，开始竞选
     if (timeout) {
         w->repeat = 0.;
         ev_timer_again(EV_A_ w);
