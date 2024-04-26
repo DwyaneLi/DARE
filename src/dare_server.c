@@ -1550,6 +1550,7 @@ poll_vote_requests()
     vote_req_t *request;
     
     /* To avoid crazy servers removing good leaders */
+    // 有leader确定他就忽略投票请求？
     if (SID_GET_L(data.ctrl_data->sid)) {
         /* Active leader known; just ignore vote requests 
         Note: a leader renounces its leadership when it receives 
@@ -1641,6 +1642,7 @@ poll_vote_requests()
     info(log_fp, "   # Local [idx=%"PRIu64"; term=%"PRIu64"]\n", 
             best_request.index, best_request.term);        
     /* Choose the best candidate */
+    // 找一个日志最完备的
     for (i = 0; i < size; i++) {
         request = &(data.ctrl_data->vote_req[i]);
         if (best_request.sid > request->sid) {
@@ -1648,6 +1650,7 @@ poll_vote_requests()
             request->sid = 0;
             continue;
         }
+        // 在这个还是执行的过程中，还有外面的server写他的vote
         if (highest_term < SID_GET_TERM(request->sid))
             highest_term = SID_GET_TERM(request->sid);
 //text(log_fp, "   Remote(%"PRIu8") [idx=%"PRIu64"; term=%"PRIu64"]\n", i, request->index,request->term);
@@ -1673,6 +1676,7 @@ text(log_fp, "   Best [idx=%"PRIu64"; term=%"PRIu64"]\n", best_request.index, be
     if (best_request.sid == old_sid) {
         /* Local log is better than remote logs; yet, local term is too low. 
         Increase TERM to increase chances to win election */
+        // 对于日志没他新的，但是term比他高的，更新自己的term
         new_sid = data.ctrl_data->sid;
         SID_SET_TERM(new_sid, highest_term);
         SID_SET_IDX(new_sid, data.config.idx);  // don't vote for anyone

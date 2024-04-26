@@ -1051,7 +1051,9 @@ int rc_send_vote_request()
 /**
  * Replicate SID of a the candidate that receives my vote;
  * future SIDs of this index cannot be lower than the replicated SID
- * 把自己的SID写到投票的candidate的prv_data_t的vote_sid里，但是它里面好像给所有人都发了
+ * 把自己接受的candidate的vote_sid里复制给所有server，
+ * 放到server的prv_data数组中自己的那个idx的对应的那个元素的的vote_sid的变量中
+ * （其实相当于告诉所有server，我投票给这个candidate了）
  * 并且会把自己的vote_sid设为sid
  */
 int rc_replicate_vote()
