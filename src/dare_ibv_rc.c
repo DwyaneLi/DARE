@@ -390,6 +390,7 @@ rc_qp_destroy( dare_ib_ep_t* ep )
 /**
  * Get the term and index of the last given vote
  * Note: the operation succeeds only if at least a majority of servers 
+ * server a把其他server i机器上prv_data[a].vote_sid读到a的rsid[i].
  * are accessible
  */
 int rc_get_replicated_vote()
