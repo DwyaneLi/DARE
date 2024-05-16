@@ -1550,7 +1550,7 @@ poll_vote_requests()
     vote_req_t *request;
     
     /* To avoid crazy servers removing good leaders */
-    // 有leader确定他就忽略投票请求？
+    // 他自己是leader就不运行这个
     if (SID_GET_L(data.ctrl_data->sid)) {
         /* Active leader known; just ignore vote requests 
         Note: a leader renounces its leadership when it receives 
