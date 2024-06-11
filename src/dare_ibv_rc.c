@@ -21,6 +21,7 @@
 #include <dare_server.h>
 #include <timer.h>
 #include <math.h>
+#include <dare_ep_db.h>
 
 /* Return code for RC operations */
 #define RC_ERROR      1
@@ -1726,6 +1727,39 @@ info(log_fp, "%s\n", buf);
 
     if (log_is_offset_larger(SRV_DATA->log, min_offset, SRV_DATA->log->commit)) {
     //if (SRV_DATA->log->commit < min_offset) {
+        /*record replicate time*/
+        dare_log_entry_t *entry;
+        int tmp = SRV_DATA->log->commit;
+        timeval t_e;
+        int rres = gettimeofday(&t_e, NULL);
+        if(rres) {
+            error(log_fp, "get committed time error\n");
+        }
+        while(log_is_offset_larger(SRV_DATA->log, min_offset, tmp)) {
+            entry = log_get_entry(SRV_DATA->log, &tmp);
+            if(!log_fit_entry(SRV_DATA->log, tmp, entry)) {
+                tmp = 0;
+                continue;
+            }
+
+            int tmp_id = combine_lid_req(entry->req_id, entry->clt_id);
+            replicate_time_t r_t;
+            HASH_FIND_INT(replicate_time, &tmp_id, r_t);
+            if(r_t != NULL) {
+                //info(log_fp, "set reply %d time raft\n", req_id);
+                //info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
+                r_t->start_time.tv_sec = t_e.tv_sec - w_t->start_time.tv_sec;
+                r_t->start_time.tv_usec = t_e.tv_usec - w_t->start_time.tv_usec;
+                //info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
+                //info(log_fp, "hash del\n");
+            } else {
+                info(log_fp, " %d not find start rtime raft\n", entry->req_id);
+            }
+
+            tmp += log_entry_len(entry);
+        }
+
+
         /* Update local commit offset... */ 
         SRV_DATA->log->commit = min_offset;
 //uint64_t ticks;

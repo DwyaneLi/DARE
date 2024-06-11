@@ -41,6 +41,7 @@ typedef struct client_req_t client_req_t;
 struct client_rep_t {
     ud_hdr_t hdr;
     uint64_t time_raft;
+    uint64_t time_replicate;
     sm_data_t data;
 };
 typedef struct client_rep_t client_rep_t;

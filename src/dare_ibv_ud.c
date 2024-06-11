@@ -47,6 +47,7 @@ char* global_mgid;
 struct ibv_wc *wc_array;
 
 write_time_t *write_time;
+replicate_time_t *replicate_time;
 
 typedef struct timeval timeval;
 /* ================================================================== */
@@ -147,6 +148,9 @@ int ud_init( uint32_t receive_count )
     /* init write_time*/
     write_time = NULL;
 
+    /* init replicate_time*/
+    replicate_time = NULL;
+
     return 0;
 }
 
@@ -162,6 +166,14 @@ void ud_shutdown()
             free(current_write);
         }
         free(write_time);        
+    }
+    if (NULL != replicate_time) {
+        replicate_time_t *current_replicate, *tmp;
+        HASH_ITER(hh, replicate_time, current_replicate, tmp) {
+            HASH_DEL(replicate_time, current_replicate);
+            free(current_replicate);
+        }
+        free(replicate_time);        
     }
     if (NULL != IBDEV->ib_mcast_ah) {
         ibv_destroy_ah(IBDEV->ib_mcast_ah);
@@ -1190,6 +1202,28 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     //HRT_GET_TIMESTAMP(SRV_DATA->t1);
     //HRT_GET_TIMESTAMP(SRV_DATA->t2);
 #endif    
+    /* record log append time*/
+    timeval t_rs;
+    int rres = gettimeofday(&t_rs, NULL);
+    if(!rres) {
+        debug(log_fp, "request:%d r_start sec:%ld usec:%ld\n",request->hdr.id, t_rs.tv_sec, t_rs.tv_usec);
+    } else {
+        debug(log_fp, "get request:%d r_start raft time success\n", request->hdr.id);
+        error(log_fp, "get request:%d r_start raft time error\n", request->hdr.id);
+    }
+    replicate_time_t *r_t;
+    HASH_FIND_INT(replicate_time, &tmp_id, r_t);
+    if(r_t == NULL) {
+        r_t = (replicate_time *)malloc(sizeof *r_t);
+        memset(r_t, 0, sizeof *r_t);
+        r_t->id = tmp_id;
+        r_t->start_time = t_rs;
+        HASH_ADD_INT(replicate_time, id, r_t);
+        debug(log_fp, "request %d from %d's rtime is recorded\n", request->hdr.id, wc->slid);
+    } else {
+        info(log_fp, "get request:%d record rtime fail, already has one\n", request->hdr.id);
+    }
+
     /* Append new entry */  
     SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, 
             SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id, 
