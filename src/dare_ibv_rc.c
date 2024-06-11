@@ -1746,11 +1746,10 @@ info(log_fp, "%s\n", buf);
             replicate_time_t r_t;
             HASH_FIND_INT(replicate_time, &tmp_id, r_t);
             if(r_t != NULL) {
-                //info(log_fp, "set reply %d time raft\n", req_id);
-                //info(log_fp, "request:%d start sec:%ld usec:%ld\n",req_id, w_t->start_time.tv_sec, w_t->start_time.tv_usec);
-                r_t->start_time.tv_sec = t_e.tv_sec - w_t->start_time.tv_sec;
-                r_t->start_time.tv_usec = t_e.tv_usec - w_t->start_time.tv_usec;
-                //info(log_fp, "request:%d end sec:%ld end:%ld the reply time is %u\n",req_id, t_e.tv_sec, t_e.tv_usec, csm_reply->time_raft);
+                //info(log_fp, "request:%d replicate start sec:%ld usec:%ld\n",entry->req_id, r_t->start_time.tv_sec, r_t->start_time.tv_usec);
+                r_t->start_time.tv_sec = t_e.tv_sec - r_t->start_time.tv_sec;
+                r_t->start_time.tv_usec = t_e.tv_usec - r_t->start_time.tv_usec;
+                //info(log_fp, "request:%d replicate end sec:%ld end usec:%ld\n",entry->req_id, r_t->start_time.tv_sec, r_t->start_time.tv_usec);
                 //info(log_fp, "hash del\n");
             } else {
                 info(log_fp, " %d not find start rtime raft\n", entry->req_id);

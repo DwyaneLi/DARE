@@ -196,6 +196,11 @@ init_client_data()
     data.raft_time = NULL;
     data.raft_time = (uint64_t*)malloc(MEASURE_COUNT * sizeof(uint64_t));
     memset(data.raft_time, 0, sizeof(data.raft_time));
+
+    /* allocate memory for replicate_time*/
+    data.replicate_time = NULL;
+    data.replicate_time = (uint64_t*)malloc(MEASURE_COUNT * sizeof(uint64_t));
+    memset(data.replicate_time, 0, sizeof(data.replicate_time));
     return 0;
 }
 
@@ -225,6 +230,11 @@ free_client_data()
     if (NULL != data.raft_time) {
         free(data.raft_time);
         data.raft_time = NULL;
+    }
+
+    if (NULL != data.replicate_time) {
+        free(data.replicate_time);
+        data.replicate_time = NULL;
     }
 }
 
@@ -455,8 +465,8 @@ repeat_trace:
     /* Then apply all the commands to the RSM */
     if (measure_count == MEASURE_COUNT) {
         /* First print the latency of this command */
-        qsort(ticks, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
-        qsort(data.raft_time, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
+        //qsort(ticks, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
+        //qsort(data.raft_time, MEASURE_COUNT, sizeof(uint64_t), cmpfunc_uint64);
         fprintf(data.output_fp, "request all cosume:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
             fprintf(data.output_fp, "%9.3lf\t", HRT_GET_USEC(ticks[i]));
@@ -465,9 +475,17 @@ repeat_trace:
         for (i = 0; i < MEASURE_COUNT; i++) {
             fprintf(data.output_fp, "%9u\t", data.raft_time[i]);
         }
-        fprintf(data.output_fp, "\noccupy:\n");
+        fprintf(data.output_fp, "\nreplicate cosume:\n");
+        for (i = 0; i < MEASURE_COUNT; i++) {
+            fprintf(data.output_fp, "%9u\t", data.replicate_time[i]);
+        }        
+        fprintf(data.output_fp, "\noccupy1:\n");
         for (i = 0; i < MEASURE_COUNT; i++) {
             fprintf(data.output_fp, "%9.3lf\t", (double)(data.raft_time[i])/(HRT_GET_USEC(ticks[i])));
+        }
+        fprintf(data.output_fp, "\noccupy2:\n");
+        for (i = 0; i < MEASURE_COUNT; i++) {
+            fprintf(data.output_fp, "%9.3lf\t", (double)(data.replicate_time[i])/(HRT_GET_USEC(ticks[i])));
         }
         fprintf(data.output_fp, "\n\n");
         /* How to get the median */

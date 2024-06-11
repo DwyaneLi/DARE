@@ -2260,6 +2260,18 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
                 info(log_fp, "set reply %d not find start time raft\n", req_id);
             }
 
+            /*set replicate time*/
+            replicate_time_t r_t;
+            HASH_FIND_INT(replicate_time, &tmp_id, r_t);
+            if(r_t != NULL) {
+                csm_reply->time_replicate = (uint64_t)(r_t->start_time.tv_sec * 1e6 + r_t->start_time.tv_usec);
+                //info(log_fp, "request:%d the replicate time is %u\n",req_id, csm_reply->time_raft);
+                HASH_DEL(replicate_time, r_t);
+                free(r_t);
+            } else {
+                info(log_fp, "set reply %d not find replicate time\n", req_id);
+            }
+
             // TODO: you should get the last_req_id from the protocol SM
             csm_reply->hdr.id = req_id;
             csm_reply->hdr.type = CSM_REPLY;
@@ -2337,7 +2349,10 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     
     info(log_fp, "the Request:%d type:%d consume %u ns in raft\n",reply->hdr.id, reply->hdr.type, reply->time_raft);
     CLT_DATA->raft_time[raft_time_count] = reply->time_raft;
+    info(log_fp, "the Request:%d type:%d consume %u ns in replicate\n",reply->hdr.id, reply->hdr.type, reply->time_replicate);
+    CLT_DATA->replicate_time[raft_time_count] = reply->time_replicate;
     raft_time_count = (raft_time_count + 1) % RAFT_TIME_COUNT;
+
     return 0;
 }
 
