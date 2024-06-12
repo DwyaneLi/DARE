@@ -29,9 +29,9 @@ typedef struct write_time_t write_time_t;
 
 struct replicate_time_t {
     int id;
-    timeval start_time_r;
+    timeval start_time;
     UT_hash_handle hh;
-}
+};
 typedef struct replicate_time_t replicate_time_t;
 extern replicate_time_t *replicate_time;
 

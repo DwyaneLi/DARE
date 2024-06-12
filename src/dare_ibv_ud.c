@@ -1214,7 +1214,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     replicate_time_t *r_t;
     HASH_FIND_INT(replicate_time, &tmp_id, r_t);
     if(r_t == NULL) {
-        r_t = (replicate_time *)malloc(sizeof *r_t);
+        r_t = (replicate_time_t *)malloc(sizeof *r_t);
         memset(r_t, 0, sizeof *r_t);
         r_t->id = tmp_id;
         r_t->start_time = t_rs;
@@ -2261,7 +2261,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             }
 
             /*set replicate time*/
-            replicate_time_t r_t;
+            replicate_time_t *r_t;
             HASH_FIND_INT(replicate_time, &tmp_id, r_t);
             if(r_t != NULL) {
                 csm_reply->time_replicate = (uint64_t)(r_t->start_time.tv_sec * 1e6 + r_t->start_time.tv_usec);

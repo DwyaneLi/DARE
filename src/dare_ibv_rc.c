@@ -1743,7 +1743,7 @@ info(log_fp, "%s\n", buf);
             }
 
             int tmp_id = combine_lid_req(entry->req_id, entry->clt_id);
-            replicate_time_t r_t;
+            replicate_time_t *r_t;
             HASH_FIND_INT(replicate_time, &tmp_id, r_t);
             if(r_t != NULL) {
                 //info(log_fp, "request:%d replicate start sec:%ld usec:%ld\n",entry->req_id, r_t->start_time.tv_sec, r_t->start_time.tv_usec);
