@@ -219,17 +219,23 @@ sleep 2
 tmp_tfile="$PWD/tmp.trace"
 tmp_dfile="$PWD/tmp.data"
 # 生成loop类型的trace就是
+echo "lalal0"
 cmd=( "${DAREDIR}/bin/kvs_trace" "--loop" "--put" "-s ${blob_size}" "-o ${tmp_tfile}" )
 ${cmd[@]}
+echo "lalal10"
 cmd=( "${DAREDIR}/bin/clt_test" "--trace" "-t $tmp_tfile" "-o $tmp_dfile" "-l write.log" "-m $DGID" )
 ${cmd[@]}
+echo "lalal11"
 rm ${tmp_tfile} ${tmp_dfile}
 
+echo "lalal1"
 CreatrTraceForClients
+echo "lala2"
 StartClients
+echo "lalal3"
 sleep 10
 StopClients
-
+echo "lalal4"
 sleep 0.2
 StopDare
 
