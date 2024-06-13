@@ -316,7 +316,7 @@ init_network_cb( EV_P_ ev_timer *w, int revents )
     }
     
     /* Start poll event */   
-    info(log_fp, "lxl init  network ok!\n");
+    //info(log_fp, "lxl init  network ok!\n");
     ev_idle_start(EV_A_ &main_event);
    
     return;
@@ -492,7 +492,7 @@ repeat_trace:
     //    HRT_GET_TIMESTAMP(data.t1);
     //}
 create_request:    
-    info(log_fp, "lxl now create request\n");
+    //info(log_fp, "lxl now create request\n");
     rc = dare_ib_create_clt_request();
     if (rc < 0) {
         /* Trace is empty */

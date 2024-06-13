@@ -146,7 +146,7 @@ int ud_init( uint32_t receive_count )
 
     /* init write_time*/
     write_time = NULL;
-    info(log_fp, "lxl ud_init ok\n", global_mgid);
+    //info(log_fp, "lxl ud_init ok\n", global_mgid);
     return 0;
 }
 
@@ -981,7 +981,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    info(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
+    //info(log_fp, "in handle_one_csm_read_request(), handle a read request%u\n", request->hdr.id);
 
     /*record time t_s*/
     timeval t_s;
@@ -1098,7 +1098,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 {
     int rc;
 
-    info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
+    //info(log_fp, "in handle_one_csm_write_request(), handle a write request%u\n", request->hdr.id);
     /*record time t_s*/
     timeval t_s;
     int res = gettimeofday(&t_s, NULL);
