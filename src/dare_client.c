@@ -139,6 +139,7 @@ int dare_client_init( dare_client_input_t *input )
     ev_set_priority(&main_event, EV_MAXPRI);
     
     /* Now wait for events to arrive */
+    info(log_fp, "now er_run\n");
     ev_run(data.loop, 0);
 
     return 0;
@@ -315,6 +316,7 @@ init_network_cb( EV_P_ ev_timer *w, int revents )
     }
     
     /* Start poll event */   
+    info(log_fp, "lxl init  network ok!\n");
     ev_idle_start(EV_A_ &main_event);
    
     return;
@@ -490,6 +492,7 @@ repeat_trace:
     //    HRT_GET_TIMESTAMP(data.t1);
     //}
 create_request:    
+    info(log_fp, "lxl now create request\n");
     rc = dare_ib_create_clt_request();
     if (rc < 0) {
         /* Trace is empty */

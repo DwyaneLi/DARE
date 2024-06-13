@@ -42,10 +42,10 @@ ForceAbsolutePath () {
 StartDare() {
     # The client starts directly (not through ssh); thus, since we ran in interactive mode, 
     # the client must be on the local node; the servers are on the other nodes
-    for ((i=0, j=0; i<$1; j++)); do
-        if [[ "x${nodes[$j]}" == "x$HOSTNAME" ]]; then
-            continue
-        fi
+    for ((i=0, j=1; i<$1; j++)); do
+        #if [[ "x${nodes[$j]}" == "x$HOSTNAME" ]]; then
+        #    continue
+        #fi
         run_dare=( "${DAREDIR}/bin/srv_test" "-l $PWD/srv${i}.log" "-n ${nodes[$j]}" "-s $1" "-i $i" "-m $DGID" )
         cmd=( "ssh" "$USER@${nodes[$j]}" "nohup" "${run_dare[@]}" "${redirection[@]}" "&" "echo \$!" )
         pids[${nodes[$j]}]=$("${cmd[@]}")
@@ -67,7 +67,7 @@ StopDare() {
 
 DAREDIR=""
 OPCODE="put"
-server_count=12
+server_count=3
 
 for arg in "$@"
 do

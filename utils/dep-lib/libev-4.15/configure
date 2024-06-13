@@ -12137,7 +12137,7 @@ Usage: $0 [OPTION]... [TAG]...
       --config     print configuration, then exit
   -q, --quiet, --silent
                    do not print progress messages
-  -d, --debug      don't remove temporary files
+  -d, --      don't remove temporary files
       --recheck    update $as_me by reconfiguring in the same conditions
       --file=FILE[:TEMPLATE]
                    instantiate the configuration file FILE
