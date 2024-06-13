@@ -96,7 +96,6 @@ if [[ "x$DAREDIR" == "x" ]]; then
     ErrorAndExit "No DARE folder defined: --dare."
 fi
 
-echo "lalala2"
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
 nodes=(`cat $PBS_NODEFILE | tr ' ' '\n'`) # | awk '!u[$0]++'`)
 node_count=${#nodes[@]}
