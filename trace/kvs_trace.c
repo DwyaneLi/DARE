@@ -22,7 +22,7 @@
 //#define MIN_DATA_LEN 8
 #define MIN_DATA_LEN 8
 #define MAX_DATA_LEN 1024
-#define BALANCE_COUNT 1000
+#define BALANCE_COUNT 10
 
 void usage( char *prog )
 {

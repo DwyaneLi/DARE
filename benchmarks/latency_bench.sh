@@ -42,7 +42,7 @@ ForceAbsolutePath () {
 StartDare() {
     # The client starts directly (not through ssh); thus, since we ran in interactive mode, 
     # the client must be on the local node; the servers are on the other nodes
-    for ((i=0, j=0; i<$1; j++)); do
+    for ((i=0, j=1; i<$1; j++)); do
         if [[ "x${nodes[$j]}" == "x$HOSTNAME" ]]; then
             continue
         fi
@@ -96,14 +96,15 @@ if [[ "x$DAREDIR" == "x" ]]; then
     ErrorAndExit "No DARE folder defined: --dare."
 fi
 
+echo "lalala2"
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
-nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
+nodes=(`cat $PBS_NODEFILE | tr ' ' '\n'`) # | awk '!u[$0]++'`)
+echo $nodes
 node_count=${#nodes[@]}
 echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
     echo "$i:${nodes[$i]}" >> nodes
 done
-
 if [ $server_count -gt $(($node_count-1)) -o $server_count -le 0 ] ; then
     ErrorAndExit "0 < #servers <= ${node_count}; --scount"
 fi
