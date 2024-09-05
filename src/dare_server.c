@@ -185,6 +185,14 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents );
 static void
 poll_cb( EV_P_ ev_idle *w, int revents );
 
+
+/* lxl add */
+static void
+hb_update_cb( EV_P_ ev_timer *w, int revents );
+
+static void
+hb_read_cb( EV_P_ ev_timer *w, int revents );
+
 /* ================================================================== */
 /* Init and cleaning up */
 #if 1
@@ -318,6 +326,8 @@ init_server_data()
     }
     memset(data.ctrl_data, 0, sizeof(ctrl_data_t));
     data.ctrl_data->sid = SID_NULL;
+    /* lxl add*/
+    data.ctrl_data->hb_counter = 0;
  
     /* Set up log */
     data.log = log_new();
@@ -951,6 +961,7 @@ hb_send_cb( EV_P_ ev_timer *w, int revents )
     /* No need to send HBs to servers in the extended config */
     size = get_group_size(data.config);
     
+    /* 发之前确认一下别人有没有发送心跳给自己，如果有变成follower */
     for (i = 0; i < size; i++) {
         if ( (i == data.config.idx) || !CID_IS_SERVER_ON(data.config.cid, i) )
             continue;
@@ -995,6 +1006,12 @@ hb_send_cb( EV_P_ ev_timer *w, int revents )
     /* Rearm timer */
     w->repeat = hb_period;
     ev_timer_again(EV_A_ w);
+
+    /* lxl add */
+    /* 将回调切换成hb_update_cb */
+    ev_set_cb(w, hb_update_cb);
+    w->repeat = NOW;
+    ev_timer_again(EV_A_ w);
     
     return;
 
@@ -1002,6 +1019,62 @@ shutdown:
     w->repeat = 0;
     ev_timer_again(EV_A_ w);
     dare_server_shutdown();
+}
+
+/* lxl add */
+/* 定期递增计数器 */
+static void
+hb_update_cb(EV_P_ ev_timer *w, int revents ) {
+    int rc;
+    
+    /* Check if any server sent an HB reply; if that's the case, we need 
+     * to incorporate that server into the active servers; restart election */
+    uint64_t new_sid = data.ctrl_data->sid;
+    uint64_t hb;
+    uint8_t i, size;
+    
+    /* No need to send HBs to servers in the extended config */
+    size = get_group_size(data.config);
+    
+    /* 发之前确认一下别人有没有发送心跳给自己，如果有变成follower */
+    for (i = 0; i < size; i++) {
+        if ( (i == data.config.idx) || !CID_IS_SERVER_ON(data.config.cid, i) )
+            continue;
+
+        /* Read HB and then reset it */
+        hb = __sync_fetch_and_and(&data.ctrl_data->hb[i], 0);
+        if (hb < new_sid) continue;
+
+        /* Somebody sent me an HB reply with a higher term */
+        info_wtime(log_fp, "Received HB from p%"PRIu8" with higher term %"PRIu64"\n", 
+                    i, SID_GET_TERM(hb));
+        rc = server_update_sid(new_sid, data.ctrl_data->sid);
+        if (0 != rc) {
+            /* Cannot update SID */
+            return;
+        }
+        server_to_follower();
+        return;
+    }
+
+    data.ctrl_data->hb_counter++;
+    if(data.ctrl_data->hb_counter == 40960) {
+        data.ctrl_data->hb_counter = 0;
+    }
+
+    /* Rearm timer */
+    w->repeat = hb_period;
+    ev_timer_again(EV_A_ w);
+    
+    return;
+    
+    // 这里因为不是主动操作，不需要shutdown
+}
+
+/* 用于follower定期读取leader的hb_counter，观看是否有变化 */
+static void
+hb_read_cb( EV_P_ ev_timer *w, int revents ) {
+
 }
 
 #endif
@@ -1514,6 +1587,15 @@ become_leader:
     ev_set_cb(&hb_event, hb_send_cb);
     hb_event.repeat = NOW;
     ev_timer_again(data.loop, &hb_event);
+
+    /* lxl add*/
+    // todo: 在这里应该先发一遍hb然后设为hb_update_cb
+    // hb_send
+    /*
+    ev_set_cb(&hb_event, hb_update_cb);
+    hb_event.repeat = NOW;
+    ev_timer_again(data.loop, &hb_event);
+    */    
     
     /* Suspend timeout adjusting mechanism */
     to_adjust_event.repeat = 0;

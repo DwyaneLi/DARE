@@ -136,6 +136,9 @@ struct ctrl_data_t {
     
     /* Remote private data */
     prv_data_t  prv_data[MAX_SERVER_COUNT];    // private data
+
+    /* lxl add*/
+    int64_t hb_counter; // add for hb
 };
 typedef struct ctrl_data_t ctrl_data_t;
 
