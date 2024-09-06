@@ -1074,7 +1074,69 @@ hb_update_cb(EV_P_ ev_timer *w, int revents ) {
 /* 用于follower定期读取leader的hb_counter，观看是否有变化 */
 static void
 hb_read_cb( EV_P_ ev_timer *w, int revents ) {
+    int rc;
+    int timeout = 1;
+    uint64_t hb;
+    uint64_t new_sid;
+    uint8_t i, size;
 
+    /* Cannot receive HBs from servers in the extended config */
+    size = get_group_size(data.config);
+
+    if (data.config.idx >= size) {
+        /* I'm not YET part of the group */
+        w->repeat = hb_timeout();
+        ev_timer_again(EV_A_ w);
+        return;        
+    }
+
+    /* Be sure that the tail does not remain set from a previous leadership */
+    data.log->tail = data.log->len;
+
+    uint8_t leader = SID_GET_IDX(data.ctrl_data->sid);
+
+    /* 先看一下有没有新的leader（不同于老leader的节点）发消息给自己*/
+    for (i = 0; i < size; i++) {
+        if( (i == data.config.idx) || !CID_IS_SERVER_ON(data.config.cid, i) )
+            continue;
+
+        hb = __sync_fetch_and_and(&data.ctrl_data->hb[i], 0);
+        if(hb < new_sid) continue;
+
+        /* 新的leader发消息来了 */
+        if(SID_GET_L(hb)) {
+            new_sid = hb;
+        }
+        info_wtime(log_fp, "Received HB from p%"PRIu8" with higher term %"PRIu64"\n", 
+                    i, SID_GET_TERM(hb));
+        rc = server_update_sid(new_sid, data.ctrl_data->sid);
+        if (0 != rc) {
+            /* Cannot update SID */
+            return;
+        }
+        server_to_follower();
+        return;                
+    }
+    /* 检查hb（有一定的滞后性）*/
+    if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+        timeout = 0;
+    }
+
+    /* 没有新leader，那么检查老leader是否存活*/
+    if(timeout) {
+        w->repeat = 0;
+        ev_timer_again(EV_A_ w);
+        start_election();
+        return;
+    } else {
+        /* leader正常存活，发送下一次RDMA操作，应对下一次检查*/
+
+        /* 重新设置读心跳时间，准备下次读心跳 */
+        w->repeat = hb_timeout();
+        ev_timer_again(EV_A_ w);        
+    }
+
+       
 }
 
 #endif
@@ -1589,6 +1651,7 @@ become_leader:
     ev_timer_again(data.loop, &hb_event);
 
     /* lxl add*/
+    data.ctrl_data->hb_counter = 0;
     // todo: 在这里应该先发一遍hb然后设为hb_update_cb
     // hb_send
     /*
@@ -2644,6 +2707,9 @@ void server_to_follower()
         }
     }
     
+    /* lxl add */
+    data.ctrl_data->last_hb = 0;
+
     /* Restart HB mechanism in receive mode */
     ev_set_cb(&hb_event, hb_receive_cb);
     hb_event.repeat = hb_timeout();

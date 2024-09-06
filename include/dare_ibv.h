@@ -176,6 +176,8 @@ int dare_ib_recover_log();
 /* HB mechanism */
 int dare_ib_send_hb();
 int dare_ib_send_hb_reply( uint8_t idx );
+/* lxl add */
+int dare_ib_get_leader_hb();
 
 /* Leader election */
 int dare_ib_send_vote_request();

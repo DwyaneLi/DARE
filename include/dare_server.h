@@ -124,6 +124,11 @@ struct ctrl_data_t {
     /* State identified (SID) */
     uint64_t    sid;
     
+    /* lxl add*/
+    int64_t hb_counter; // add for hb
+    int64_t last_hb; // last hb read from leader
+    int64_t leader_hb; // now hb read from leader
+
     /* DARE arrays */
     vote_req_t    vote_req[MAX_SERVER_COUNT];       /* vote requests */
     log_offsets_t log_offsets[MAX_SERVER_COUNT];	/* log offsets */
@@ -136,9 +141,6 @@ struct ctrl_data_t {
     
     /* Remote private data */
     prv_data_t  prv_data[MAX_SERVER_COUNT];    // private data
-
-    /* lxl add*/
-    int64_t hb_counter; // add for hb
 };
 typedef struct ctrl_data_t ctrl_data_t;
 

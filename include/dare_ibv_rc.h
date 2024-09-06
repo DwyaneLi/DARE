@@ -63,6 +63,8 @@ int rc_recover_log();
 /* HB mechanism */
 int rc_send_hb();
 int rc_send_hb_reply( uint8_t idx );
+/* lxl add */
+int rc_get_leader_hb();
 
 /* Leader election */
 int rc_send_vote_request();
