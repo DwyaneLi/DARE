@@ -963,6 +963,55 @@ int rc_send_hb_reply( uint8_t idx )
     return 0;
 }
 
+/* lxl add */
+int rc_get_leader_hb(uint8_t leader) {
+    int rc;
+    dare_ib_ep_t *ep;
+    TIMER_INIT;
+
+    if (leader >= get_group_size(SRV_DATA->config)) 
+        error_return(1, log_fp, "Index out of bound\n");
+
+    server_t *server = &SRV_DATA->config.servers[i];
+    if(server->last_get_read_ssn) {
+        /* Still waiting for another read */
+        return 3;
+    }
+    /* Set offset accordingly */
+    uint32_t offset = (uint32_t)(offsetof(ctrl_data_t, hb_counter));
+
+    ssn++;
+    server->last_get_read_ssn = ssn;
+    TIMER_START(log_fp, "Getting leader HB (%"PRIu64")\n", ssn);
+
+    if(!CID_IS_SEVER_ON(SRV_DATA->config.cid, idx)) {
+        return 2;
+    }
+    
+    ep = (dare_ib_ep_t *)SRV_DATA->config.servers[leader].ep;
+    if(0 == ep->rc_connected) {
+        return 2;
+    }
+    text(log_fp, "   (p%"PRIu8")\n", idx);
+
+
+    rem_mem_t rm;
+    rm.raddr = ep->rc_ep.rmt_mr[CTRL_QP].raddr + offset;
+    rm.rkey = ep->rc_ep.rmt_mr[CTRL_QP].rkey;
+
+    /* server_id, qp_id, buf, len, mr, opcode, signaled, rm, posted_sends */ 
+    rc = post_send(idx, CTRL_QP, &SRV_DATA->ctrl_data->leader_hb,
+                    sizeof(int64_t), IBDEV->lcl_mr[CTRL_QP],
+                    IBV_WR_RDMA_READ, NOTSIGNALED, rm, NULL);
+    if (0 != rc) {
+        /* This should never happen */
+        error_return(1, log_fp, "Cannot post send operation\n");
+    }
+    TIMER_STOP(log_fp);
+
+    return 0;
+}
+
 #endif
 
 /* ================================================================== */

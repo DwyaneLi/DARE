@@ -399,6 +399,11 @@ int dare_ib_send_hb_reply( uint8_t idx )
     return rc_send_hb_reply(idx);
 }
 
+/* lxl add */
+int dare_ib_get_leader_hb() {
+    return rc_get_leader_hb();
+}
+
 #endif 
 
 /* ================================================================== */

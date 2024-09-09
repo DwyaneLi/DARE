@@ -973,7 +973,9 @@ hb_send_cb( EV_P_ ev_timer *w, int revents )
         /* Somebody sent me an HB reply with a higher term */
         info_wtime(log_fp, "Received HB from p%"PRIu8" with higher term %"PRIu64"\n", 
                     i, SID_GET_TERM(hb));
-        rc = server_update_sid(new_sid, data.ctrl_data->sid);
+        //rc = server_update_sid(new_sid, data.ctrl_data->sid);
+        /* lxl add */
+        rc = server_update_sid(hb, data.ctrl_data->sid);
         if (0 != rc) {
             /* Cannot update SID */
             return;
