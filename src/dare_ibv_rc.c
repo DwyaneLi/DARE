@@ -967,47 +967,58 @@ int rc_send_hb_reply( uint8_t idx )
 int rc_get_leader_hb(uint8_t leader) {
     int rc;
     dare_ib_ep_t *ep;
+    uint8_t i, size = get_group_size(SRV_DATA->config);
+    int posted_sends[MAX_SERVER_COUNT];
     TIMER_INIT;
 
-    if (leader >= get_group_size(SRV_DATA->config)) 
+    if (leader >= size) 
         error_return(1, log_fp, "Index out of bound\n");
 
-    server_t *server = &SRV_DATA->config.servers[i];
-    if(server->last_get_read_ssn) {
-        /* Still waiting for another read */
-        return 3;
-    }
     /* Set offset accordingly */
     uint32_t offset = (uint32_t)(offsetof(ctrl_data_t, hb_counter));
+    
+    memset(posted_sends, 0, MAX_SERVER_COUNT*sizeof(int));
+    for(i = 0; i < size; i++) {
+        posted_sends[i] = -1;
+    }
 
     ssn++;
-    server->last_get_read_ssn = ssn;
     TIMER_START(log_fp, "Getting leader HB (%"PRIu64")\n", ssn);
 
-    if(!CID_IS_SEVER_ON(SRV_DATA->config.cid, idx)) {
-        return 2;
+    if(!CID_IS_SEVER_ON(SRV_DATA->config.cid, leader)) {
+        error_return(1, log_fp, "leader is off, cant read hb_counter\n");
     }
     
     ep = (dare_ib_ep_t *)SRV_DATA->config.servers[leader].ep;
     if(0 == ep->rc_connected) {
-        return 2;
+        error_return(1, log_fp, "rc is unconnected, cant read hb_counter\n");
     }
-    text(log_fp, "   (p%"PRIu8")\n", idx);
 
+    text(log_fp, "   (p%"PRIu8")\n", leader);
 
     rem_mem_t rm;
     rm.raddr = ep->rc_ep.rmt_mr[CTRL_QP].raddr + offset;
     rm.rkey = ep->rc_ep.rmt_mr[CTRL_QP].rkey;
-
+    posted_sends[leader] = 1;
     /* server_id, qp_id, buf, len, mr, opcode, signaled, rm, posted_sends */ 
-    rc = post_send(idx, CTRL_QP, &SRV_DATA->ctrl_data->leader_hb,
+    rc = post_send(leader, CTRL_QP, &SRV_DATA->ctrl_data->leader_hb,
                     sizeof(int64_t), IBDEV->lcl_mr[CTRL_QP],
-                    IBV_WR_RDMA_READ, NOTSIGNALED, rm, NULL);
+                    IBV_WR_RDMA_READ, SIGNALED, rm, posted_sends);
     if (0 != rc) {
         /* This should never happen */
         error_return(1, log_fp, "Cannot post send operation\n");
     }
     TIMER_STOP(log_fp);
+
+    // 等待读操作完成
+    rc = wait_for_one(posted_sends, CTRL_QP);
+    if(RC_ERROR == rc) {
+        error_return(1, log_fp, "Cannot read hb_counter info\n");
+    }
+    if(RC_SUCCESS != rc) {
+        /* Operation failed; try again later */
+        return -1;
+    }
 
     return 0;
 }

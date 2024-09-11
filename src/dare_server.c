@@ -1119,9 +1119,18 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
         server_to_follower();
         return;                
     }
+
+    /* 发送rdma read去读leader的hb*/
+    rc = dare_ib_get_leader_hb(leader);
+    if(rc != 0) {
+        /* 当做leader宕机处理 */
+        timeout = 1;
+    }
+
     /* 检查hb（有一定的滞后性）*/
     if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
         timeout = 0;
+        data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
     }
 
     /* 没有新leader，那么检查老leader是否存活*/
@@ -1136,9 +1145,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
         /* 重新设置读心跳时间，准备下次读心跳 */
         w->repeat = hb_timeout();
         ev_timer_again(EV_A_ w);        
-    }
-
-       
+    }      
 }
 
 #endif
@@ -2712,10 +2719,17 @@ void server_to_follower()
     /* lxl add */
     data.ctrl_data->last_hb = 0;
 
+    /* 切换hb_event到hb_read_cb， 因为你这时候已经知道leader是谁了*/
+    ev_set_cb(&hb_event, hb_read_cb);
+    hb_event.repeat = hb_timeout();
+    ev_timer_again(data.loop, &hb_event);    
+
     /* Restart HB mechanism in receive mode */
+    /*
     ev_set_cb(&hb_event, hb_receive_cb);
     hb_event.repeat = hb_timeout();
     ev_timer_again(data.loop, &hb_event);
+    */
 }
 
 int server_update_sid( uint64_t new_sid, uint64_t old_sid )
