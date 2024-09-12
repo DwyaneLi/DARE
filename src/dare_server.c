@@ -56,6 +56,8 @@ double recomputed_hb_timeout;
 int leader_failed;
 int hb_timeout_flag;
 uint64_t latest_hb_received;
+/* lxl add */
+uint64_t latest_hb_read;
 
 unsigned long long g_timerfreq;
 
@@ -781,43 +783,106 @@ shutdown:
 /**
  * Periodically adjust the HB timeout
  */
+
+// static void
+// to_adjust_cb( EV_P_ ev_timer *w, int revents )
+// {
+//     static uint64_t total_count = 0;
+//     static uint64_t fp_count = 0;
+
+//     uint64_t hb;
+//     uint8_t leader = SID_GET_IDX(data.ctrl_data->sid);
+    
+//     hb timeout 就关闭
+//     if (hb_timeout_flag) {
+//         w->repeat = 0;
+//         ev_timer_again(EV_A_ w);
+//         return;
+//     }
+
+//     /* Total number of trials */
+//     total_count++;
+    
+//     /* Read HB and reset it - atomic operation */
+//     hb = __sync_fetch_and_and(&data.ctrl_data->hb[leader], 0);
+//     if (0 != hb) {
+//         /* HB received */
+//         latest_hb_received = hb;
+//         if (leader_failed) {
+//             /* False possitive */
+//             fp_count++;
+//             leader_failed = 0;
+//             /* Increament timer with 0.1 of HB period */
+//             recomputed_hb_timeout += hb_period * 1;
+//             info_wtime(log_fp, "false possitive => increase recomputed timeout: %lf\n", recomputed_hb_timeout);
+//         }
+//     }
+//     else {
+//         /* No HB */
+//         leader_failed = 1;
+//     }
+
+//     if (!hb_timeout_flag) {
+//         if ( (total_count > 100000) && ((double)fp_count/total_count < 0.0001) ) {
+//             /* Less than 0.01% false possitives */
+//             info_wtime(log_fp, "New timeout: %lf (old one was %lf)\n", 
+//                         recomputed_hb_timeout, hb_timeout());
+//             info(log_fp, "   # %"PRIu64" fp out of %"PRIu64"\n", fp_count, total_count);
+//             hb_timeout_flag = 1;
+//             /* From now on the timeout period is adjusted during the HB */ 
+//             w->repeat = 0;
+//             ev_timer_again(EV_A_ w);
+//             return;
+//         }
+//     }
+    
+//     /* Reset timer */
+//     w->repeat = recomputed_hb_timeout;
+//     ev_timer_again(EV_A_ w);
+// }
+
+/* lxl add */
 static void
-to_adjust_cb( EV_P_ ev_timer *w, int revents )
+to_adjust_cb( EV_P_ ev_timer *w, int revents) 
 {
     static uint64_t total_count = 0;
     static uint64_t fp_count = 0;
 
-    uint64_t hb;
     uint8_t leader = SID_GET_IDX(data.ctrl_data->sid);
-    
+
     if (hb_timeout_flag) {
         w->repeat = 0;
         ev_timer_again(EV_A_ w);
         return;
-    }
+    }    
 
     /* Total number of trials */
     total_count++;
+
+    int rc;
+    rc = dare_ib_get_leader_hb(leader); 
+    if(rc != 0) {
+        /* 当做leader宕机处理 */
+        leader_failed = 1;
+        goto repeat;       
+    }
     
-    /* Read HB and reset it - atomic operation */
-    hb = __sync_fetch_and_and(&data.ctrl_data->hb[leader], 0);
-    if (0 != hb) {
-        /* HB received */
-        latest_hb_received = hb;
-        if (leader_failed) {
-            /* False possitive */
+    if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+        latest_hb_read = 1;
+        data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
+        if(leader_failed) {
+            /* false positive*/
             fp_count++;
             leader_failed = 0;
             /* Increament timer with 0.1 of HB period */
             recomputed_hb_timeout += hb_period * 1;
             info_wtime(log_fp, "false possitive => increase recomputed timeout: %lf\n", recomputed_hb_timeout);
         }
-    }
-    else {
-        /* No HB */
+    } else {
         leader_failed = 1;
-    }
+    } 
 
+repeat:
     if (!hb_timeout_flag) {
         if ( (total_count > 100000) && ((double)fp_count/total_count < 0.0001) ) {
             /* Less than 0.01% false possitives */
@@ -830,12 +895,14 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents )
             ev_timer_again(EV_A_ w);
             return;
         }
-    }
-    
+    }  
+
     /* Reset timer */
     w->repeat = recomputed_hb_timeout;
     ev_timer_again(EV_A_ w);
 }
+
+
 
 /**
  * Periodically check for the HB flag
@@ -1096,19 +1163,45 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
     data.log->tail = data.log->len;
 
     uint8_t leader = SID_GET_IDX(data.ctrl_data->sid);
-
+    new_sid = data.ctrl_data->sid;
     /* 先看一下有没有新的leader（不同于老leader的节点）发消息给自己*/
     for (i = 0; i < size; i++) {
         if( (i == data.config.idx) || !CID_IS_SERVER_ON(data.config.cid, i) )
             continue;
 
         hb = __sync_fetch_and_and(&data.ctrl_data->hb[i], 0);
-        if(hb < new_sid) continue;
+
+        if(0 == hb) {
+            /* No heartbeat*/
+            continue;
+        }
+
+        /* 收到过时leader的消息，得提醒他 */
+        if(hb < new_sid) {
+            if (SID_GET_L(hb)) {
+            /* Received HB from outdated leader */
+            info_wtime(log_fp, "Received outdated HB from p%"PRIu8"\n", i);
+            info(log_fp, "   # HB: [%010"PRIu64"|%d|%03"PRIu8"]; "
+                "local SID: [%010"PRIu64"|%d|%03"PRIu8"]\n",
+                SID_GET_TERM(hb), (SID_GET_L(hb) ? 1 : 0),
+                SID_GET_IDX(hb), SID_GET_TERM(new_sid),
+                (SID_GET_L(new_sid) ? 1 : 0), SID_GET_IDX(new_sid) );
+            dare_ib_send_hb_reply(i);
+            /* Increament timer with 0.1 of HB period */
+            recomputed_hb_timeout += hb_period * 0.1;
+            }
+            continue;        
+        }
 
         /* 新的leader发消息来了 */
         if(SID_GET_L(hb)) {
             new_sid = hb;
-        }
+        }             
+    }
+
+    /* 有新的leader发消息过来了更新sid */
+    if (new_sid != data.ctrl_data->sid) {       
+        /* This SID is better */
         info_wtime(log_fp, "Received HB from p%"PRIu8" with higher term %"PRIu64"\n", 
                     i, SID_GET_TERM(hb));
         rc = server_update_sid(new_sid, data.ctrl_data->sid);
@@ -1117,18 +1210,29 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
             return;
         }
         server_to_follower();
-        return;                
+        return;      
+    }    
+
+    /* 如果使用to_adjust_cb读到了，这里就算了 */
+    if(!latest_hb_read) {
+        latest_hb_read = 0;
+        w->repeat = hb_timeout();
+        ev_timer_again(EV_A_ w);
+        return;       
     }
 
-    /* 发送rdma read去读leader的hb*/
+    /* 没有收到心跳，于是确定leader是不是存活，发送rdma read去读leader的hb*/
     rc = dare_ib_get_leader_hb(leader);
     if(rc != 0) {
         /* 当做leader宕机处理 */
-        timeout = 1;
+        w->repeat = 0;
+        ev_timer_again(EV_A_ w);
+        start_election();
+        return;       
     }
 
-    /* 检查hb（有一定的滞后性）*/
-    if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+    /* 检查hb */
+    if(latest_hb_read != 0  && data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
         timeout = 0;
         data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
     }
@@ -1140,8 +1244,6 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
         start_election();
         return;
     } else {
-        /* leader正常存活，发送下一次RDMA操作，应对下一次检查*/
-
         /* 重新设置读心跳时间，准备下次读心跳 */
         w->repeat = hb_timeout();
         ev_timer_again(EV_A_ w);        
@@ -1704,7 +1806,7 @@ poll_vote_requests()
     vote_req_t *request;
     
     /* To avoid crazy servers removing good leaders */
-    // 他自己是leader就不运行这个
+    // 知道确定的leader就不运行这个
     if (SID_GET_L(data.ctrl_data->sid)) {
         /* Active leader known; just ignore vote requests 
         Note: a leader renounces its leadership when it receives 
@@ -1905,6 +2007,8 @@ text(log_fp, "   Best [idx=%"PRIu64"; term=%"PRIu64"]\n", best_request.index, be
     }
 //debug(log_fp, "Send vote ACK\n");
 
+    /* lxl add */
+    data.ctrl_data->last_hb = 0;
     /* Restart HB mechanism in receive mode */
     ev_set_cb(&hb_event, hb_receive_cb);
     // TODO: this should be a different timeout
