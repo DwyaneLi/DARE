@@ -239,6 +239,7 @@ init_network_cb( EV_P_ ev_timer *w, int revents )
     ev_timer_again(EV_A_ w);
     
     /* Init IB device: ibv_device; ibv_context & ud_init */
+    // 找到本机合适的ib设备作为ib device
     rc = dare_init_ib_device(MAX_SERVER_COUNT);
     if (0 != rc) {
         error(log_fp, "Cannot init IB device\n");

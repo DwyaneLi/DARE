@@ -582,6 +582,7 @@ int ud_start()
     return 0;
 }
 
+// 先给所有的server留一个receive
 static int
 ud_post_receives()
 {
@@ -1125,10 +1126,15 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     //HRT_GET_TIMESTAMP(SRV_DATA->t1);
     //HRT_GET_TIMESTAMP(SRV_DATA->t2);
 #endif    
-    /* Append new entry */  
-    SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, 
-            SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id, 
-            wc->slid, CSM, &request->cmd);
+    /* Append new entry */ 
+    /* lxl add */ 
+    //SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, 
+    //        SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id, 
+    //        wc->slid, CSM, &request->cmd);
+    SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
+              SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
+              wc->slid, CSM, &request->cmd, 
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets));
 #ifdef WRITE_BENCH   
     if (measure_count == 999) {
         info(log_fp, "Adding %"PRIu64" bytes to the log\n", 
@@ -2471,6 +2477,7 @@ double ud_loggp_prtt( int n, double delay, uint32_t size, int inline_flag )
 
 /* ================================================================== */
 
+// 一般用来设置leader_ep
 static int
 wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
 {

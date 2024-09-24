@@ -1814,6 +1814,177 @@ commit_new_entries()
 /**
  * Poll for new committed entries and apply them to the SM
  */
+// static void 
+// apply_committed_entries()
+// {
+//     int rc;
+//     int once = 0;
+    
+//     uint64_t old_apply = data.log->apply;
+//     dare_log_entry_t *entry;
+//     while (log_is_offset_larger(data.log, 
+//                 data.log->commit, data.log->apply))
+//     {
+//         if (!IS_LEADER) {
+//             //text_wtime(log_fp, "New committed entries ");
+//             //TEXT_PRINT_LOG(log_fp, data.log);
+//         }
+//         else {
+//             if (!once) {
+//                 //info_wtime(log_fp, "New entries committed: %"PRIu64" -> %"PRIu64"\n", 
+//                 //    data.log->apply, data.log->commit);
+//                 once = 1;
+//             }
+//         }
+
+//         /* Get entry (cannot be NULL);
+//         Note: the apply offset is updated locally  */
+//         entry = log_get_entry(data.log, &data.log->apply);
+//         if (!log_fit_entry(data.log, data.log->apply, entry)) {
+//             /* Not enough place for an entry (with the command) */
+//             data.log->apply = 0;
+//             continue;
+//         }
+        
+//         if (!IS_LEADER)
+//             goto apply_entry;
+
+//         /* Just the leader... */
+//         if ( (NOOP == entry->type) || (HEAD == entry->type) )
+//             goto apply_next_entry;
+//         if (CSM == entry->type) {
+//             /* Client SM entry */
+//             if (entry->req_id != 0) {
+//                 /* Send reply to the client */
+//                 rc = dare_ib_send_clt_reply(entry->clt_id, 
+//                                         entry->req_id, CSM);
+//                 if (0 != rc) {
+//                     error(log_fp, "Cannot send client reply\n");
+//                 }
+//             }
+//             goto apply_entry;
+//         }
+        
+//         /* CONFIG entry */
+//         if (CID_STABLE == entry->data.cid.state) {
+//             if (entry->req_id != 0) {
+//                 /* Send reply to the client */
+//                 rc = dare_ib_send_clt_reply(entry->clt_id, 
+//                             entry->req_id, CONFIG);
+//                 if (0 != rc) {
+//                     error(log_fp, "Cannot send client reply\n");
+//                 }
+//                 if (dare_state & DIE_AF_COMMIT) {
+//                     info(log_fp, "I was a victim of a downsize... bye bye\n");
+//                     dare_server_shutdown();
+//                 }
+//             }
+//             goto apply_next_entry;
+//         }
+//         if (data.config.cid.epoch > entry->data.cid.epoch) {
+//             /* The entry is from a previous configuration; 
+//             if unstable, ignore it */
+//             goto apply_next_entry;
+//         }
+        
+//         /* Unstable CONFIG entry */
+//         dare_cid_t old_cid = data.config.cid;
+//         uint64_t req_id = entry->req_id;
+//         uint16_t clt_id = entry->clt_id;
+
+//         if (CID_EXTENDED == entry->data.cid.state) {
+//             /* Move configuration to transitional state */
+//             data.config.cid.state = CID_TRANSIT;
+//             if (entry->req_id != 0) {
+//                 /* Send reply to the server so that it can join the group */
+//                 rc = dare_ib_send_clt_reply(entry->clt_id, 
+//                             entry->req_id, CONFIG);
+//                 if (0 != rc) {
+//                     error(log_fp, "Cannot send client reply\n");
+//                 }
+//                 /* Avoid sending a reply twice */
+//                 req_id = 0;
+//                 clt_id = 0;
+//             }
+//         }
+//         else if (CID_TRANSIT == entry->data.cid.state) {
+//             /* Move configuration to a stable state */
+//             uint8_t i;
+//             data.config.cid.state = CID_STABLE;
+//             /* Remove additional servers */
+//             for (i = data.config.cid.size[1]; 
+//                 i < data.config.cid.size[0]; i++)
+//             {
+//                 if (i == data.config.idx) {
+//                     /* Let the leader finish the operation first
+//                     Note: if the leader succeeds in committing 
+//                     the CONFIG entry, the servers do not have to 
+//                     be aware of the commit; a majority will have 
+//                     the new entry => the new leader will have it */
+//                     info_wtime(log_fp, "They gonna kill me\n");
+//                     dare_state |= DIE_AF_COMMIT;
+//                     CID_SERVER_RM(data.config.cid, i);
+//                     continue;
+//                 }
+//                 if (!CID_IS_SERVER_ON(data.config.cid, i)) {
+//                     continue;
+//                 }
+//                 CID_SERVER_RM(data.config.cid, i);
+//                 dare_ib_disconnect_server(i);
+//             }
+//             data.config.cid.size[0] = data.config.cid.size[1];
+//             data.config.cid.size[1] = 0;
+//         }
+//         data.config.req_id = req_id;
+//         data.config.clt_id = clt_id;
+//         PRINT_CONF_TRANSIT(old_cid, data.config.cid);
+//         /* Append CONFIG entry */
+//         log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
+//                         req_id, clt_id, CONFIG, &data.config.cid);
+//         goto apply_next_entry;
+        
+// apply_entry:        
+//         /* Apply entry */
+//         if (CSM == entry->type) {
+//             if (!IS_LEADER) {
+//                 if (entry->idx % 10000 == 0) {
+//                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
+//                                 entry->idx, entry->term);
+//                     INFO_PRINT_LOG(log_fp, data.log);
+//                 }
+//             }
+//             //else {
+//             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
+//             //}
+//             rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
+//             if (0 != rc) {
+//                 error(log_fp, "Cannot apply entry\n");
+//             }
+//             last_applied_entry.idx = entry->idx;
+//             last_applied_entry.term = entry->term;
+//             last_applied_entry.offset = data.log->apply;
+//             /* Needed for answering read requests */
+//             data.last_cmt_write_csm_idx = entry->idx;
+//         }
+        
+// apply_next_entry:        
+//         /* Advance apply offset */
+//         data.log->apply += log_entry_len(entry);
+//     }
+    
+//     /* When new entries are applied, the leader verifies if there are 
+//     pending read requests */
+//     if ((old_apply != data.log->apply) && IS_LEADER) {
+//         ep_dp_reply_read_req(&data.endpoints, data.last_cmt_write_csm_idx);
+//     }
+    
+// }
+
+
+/* lxl add */
+/**
+ * Poll for new committed entries and apply them to the SM
+ */
 static void 
 apply_committed_entries()
 {
@@ -1846,8 +2017,12 @@ apply_committed_entries()
             continue;
         }
         
-        if (!IS_LEADER)
+        if (!IS_LEADER) {
+            if (CSM == entry->type) {
+                // 进行消息回复
+            }
             goto apply_entry;
+        }
 
         /* Just the leader... */
         if ( (NOOP == entry->type) || (HEAD == entry->type) )

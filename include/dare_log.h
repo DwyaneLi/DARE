@@ -36,6 +36,10 @@ struct dare_log_entry_t {
     uint64_t req_id;    /* The request ID of the client */
     uint16_t clt_id;    /* LID of client */
     uint8_t  type;      /* CSM, CONFIG, NOOP, HEAD */
+
+    /* lxl add */
+    int16_t replier; /* LID of replier*/
+
     //uint8_t  pad[5];
     union {
         sm_cmd_t   cmd;
@@ -493,6 +497,135 @@ log_append_entry( dare_log_t* log,
     entry->type    = type;
     if (!log_fit_entry_header(log, log->end)) {
         log->end = 0;
+    }
+    
+    /* Add data of the new entry */
+    switch(type) {
+        case CSM:
+        {
+//info(log_fp, "### add log entry CSM\n");
+            entry->data.cmd.len = cmd->len;
+            if (!log_fit_entry(log, log->end, entry)) {
+                /* Not enough place for an entry (with the command) */
+                log->end = 0;
+                entry = log_add_new_entry(log);
+                if (!entry) {
+                    info_wtime(log_fp, "The LOG is full\n");
+                    return 0;
+                }
+                entry->idx          = idx;
+                entry->term         = term;
+                entry->req_id       = req_id;
+                entry->clt_id       = clt_id;
+                entry->type         = type;
+                entry->data.cmd.len = cmd->len;
+            }
+            /* Copy the command */
+            if (cmd->len) {
+                memcpy(entry->data.cmd.cmd, cmd->cmd, entry->data.cmd.len);
+            }
+            break;
+        }
+        case CONFIG:
+//info(log_fp, "### add log entry CONFIG\n");
+            entry->data.cid = *cid;
+            break;
+        case HEAD:
+//info(log_fp, "### add log entry HEAD\n");
+            entry->data.head = *head;
+            break;
+        case NOOP:
+//info(log_fp, "### add log entry NOOP\n");
+            break;
+    }
+    /* Set new tail (offset of last entry) */
+    log->tail = log->end;
+    /* Set new end */
+    log->end += log_entry_len(entry);
+
+    text(log_fp, "APPENDED ENTRY [%s]: ", 
+            (entry->type == CSM) ? "CSM" : 
+            (entry->type == CONFIG) ? "CONFIG" : 
+            (entry->type == HEAD) ? "HEAD" : "NOOP");
+    TEXT_PRINT_LOG(log_fp, log);
+    
+    return idx;
+}
+
+/* lxl add */
+/**
+ * Append an entry to the local log; 
+ * called only by the leader
+ * as a side effect, the leader stores the tail offset; 
+ * note that the tail offset is reset when losing leadership
+ * ! safe over RDMA
+ */
+// 加入了对replier的设置，通过读applied_index来选择一个最空闲的server进行回复。
+static uint64_t 
+log_append_entry_new( dare_log_t* log,
+                    uint64_t term, 
+                    uint64_t req_id,
+                    uint16_t clt_id,
+                    uint8_t  type,
+                    void *data,
+                    server_config_t *config,
+                    uint64_t *apply_offsets)
+{
+    sm_cmd_t *cmd = (sm_cmd_t*)data;
+    dare_cid_t *cid = (dare_cid_t*)data;
+    uint64_t *head = (uint64_t*)data;
+    if (type != HEAD) {
+        /* Avoid double HEAD */
+        prev_log_entry_head = 0;
+    }
+
+    /* Compute new index */
+    if (log->tail == log->len) {
+        log->tail = log_get_tail(log);
+    }
+    uint64_t offset = log->tail;
+    dare_log_entry_t *last_entry = log_get_entry(log, &offset);
+    uint64_t idx = last_entry ? last_entry->idx + 1 : 1;
+    
+    /* Create new entry */
+    dare_log_entry_t *entry = log_add_new_entry(log);
+    if (!entry) {
+        info_wtime(log_fp, "The LOG is full\n");
+        return 0;
+    }
+    entry->idx     = idx;
+    entry->term    = term;
+    entry->req_id  = req_id;
+    entry->clt_id  = clt_id;
+    entry->type    = type;
+    if (!log_fit_entry_header(log, log->end)) {
+        log->end = 0;
+    }
+
+    /* lxl add */
+    entry->replier = -1;
+    if (type == CSM) {
+        int i;
+        uint8_t size = get_extended_group_size(config);
+        uint64_t max_index = 0;
+        for(i = 0; i < size; i++) {
+            // 这个server没有存活，不选择他
+            if (!CID_IS_SERVER_ON(config->cid, i)) {
+                continue;
+            }
+            // 这种情况应该是不会发生的
+            if (apply_offsets[i] >= entry->idx) {
+                continue;
+            }
+            if (apply_offsets[i] > max_index) {
+                max_index = apply_offsets[i];
+                entry->replier = i;
+            }
+        }
+        // 没有选出合适的server， 一般可能是单节点的情况，就把自己当做回复的节点
+        if(entry->replier == -1) {
+            entry->replier == config->idx;
+        }
     }
     
     /* Add data of the new entry */
