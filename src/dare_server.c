@@ -2018,8 +2018,16 @@ apply_committed_entries()
         }
         
         if (!IS_LEADER) {
+            /* lxl add */
             if (CSM == entry->type) {
                 // 进行消息回复
+                // 是自己的消息才回复
+                if (entry->req_id != 0 && entry->replier == data.config.idx) {
+                    rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                    if (0 != rc) {
+                        error(log_fp, "im follower, Cannot send client reply\n");
+                    }
+                }
             }
             goto apply_entry;
         }
@@ -2029,7 +2037,7 @@ apply_committed_entries()
             goto apply_next_entry;
         if (CSM == entry->type) {
             /* Client SM entry */
-            if (entry->req_id != 0) {
+            if (entry->req_id != 0 && entry->replier == data.config.idx) { // lxl add
                 /* Send reply to the client */
                 rc = dare_ib_send_clt_reply(entry->clt_id, 
                                         entry->req_id, CSM);
