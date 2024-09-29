@@ -88,6 +88,10 @@ struct ibv_ah*  ud_ah_create( uint16_t dlid );
 void ud_ah_destroy( struct ibv_ah* ah );
 
 uint8_t ud_get_message();
+
+/* lxl add */
+uint8_t ud_get_message_new();
+
 int ud_join_cluster();
 int ud_exchange_rc_info();
 int ud_update_rc_info();

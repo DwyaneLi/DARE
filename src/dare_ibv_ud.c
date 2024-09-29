@@ -64,6 +64,13 @@ static int
 ud_send_message( ud_ep_t *ud_ep, uint32_t length );
 static uint8_t
 handle_csm_read_requests( struct ibv_wc *read_wcs, uint16_t read_count );
+
+/* lxl add */
+static uint8_t
+handle_csm_requests( struct ibv_wc *wcs, uint16_t rd_wr_count );
+static void 
+handle_one_csm_read_request_new(struct ibv_wc *wc, client_req_t *request);
+
 static void 
 handle_one_csm_read_request(struct ibv_wc *wc, client_req_t *request);
 static uint8_t
@@ -897,6 +904,108 @@ handle_messages:
     return type;
 }
 
+/* lxl add */
+uint8_t ud_get_message_new()
+{
+    int ne, i, j;
+    uint8_t type = MSG_NONE, prev_type = MSG_NONE;
+    struct ibv_wc *wc = wc_array;
+    uint16_t wc_count = 0, rd_wr_count = 0;
+    ud_hdr_t *ud_hdr;
+    uint8_t read_flag = 0;
+
+get_message:    
+    ne = ibv_poll_cq(IBDEV->ud_rcq, 1, wc);
+    if (ne < 0) {
+        error_return(MSG_ERROR, log_fp, "Couldn't poll completion queue\n");
+    }
+    if (ne == 0) {
+        goto handle_messages;
+    }
+    if (wc->status != IBV_WC_SUCCESS) {
+        error_return(MSG_ERROR, log_fp, 
+            "Completion with status 0x%x was found\n", wc->status);
+    }
+    if (wc->slid == IBDEV->lid) {
+        /* Rearm and try again */
+        ud_post_one_receive(wc->wr_id);
+        goto get_message;
+        //goto handle_messages;
+    }
+    if (wc->opcode & IBV_WC_RECV) {
+        /* For UD: the number of bytes transferred is the 
+           payload of the message plus the 40 bytes reserved 
+           for the GRH */
+        ud_hdr = (ud_hdr_t*)(IBDEV->ud_recv_bufs[wc->wr_id] + 40);
+        //debug(log_fp, "byte_len = %"PRIu32"\n", wc->byte_len);
+        //debug(log_fp, "type = %"PRIu8"\n", ud_hdr->type);
+        //debug(log_fp, "ID = %"PRIu64"\n", ud_hdr->id);
+        //dump_bytes(log_fp, ud_hdr, wc->byte_len - 40, "received bytes");
+        /* Increase WC count */
+        wc_count++; wc++;
+        /* Only the server can receive READ or WRITE requests */
+        if (IBV_SERVER != IBDEV->ulp_type) goto handle_messages;
+        /* Check the type of the operation */
+        type = ud_hdr->type;
+        if (MSG_NONE == prev_type) {
+            prev_type = type;
+        }
+        if((CSM_READ == type || CSM_WRITE == type) && (CSM_READ == prev_type || CSM_WRITE == prev_type)) {
+            /* csm request; gather more*/
+            rd_wr_count++;
+            goto get_message;
+        }
+    }
+    else {
+        /* Rearm and try again */
+        ud_post_one_receive(wc->wr_id);
+        goto get_message;
+    }
+
+handle_messages:    
+    /* Handle read/write requests */
+    if (rd_wr_count) {
+        /* Simulate a server's CPU failure; the NIC & memory still works */
+        //if (!is_leader()) {
+        //    info_wtime(log_fp, "Received message over UD: type=%"PRIu8"\n", type);
+        //    sleep(10);
+        //    return type;
+        //}
+            type = handle_csm_requests(wc_array, rd_wr_count);
+        if (read_flag) {
+            /* Read requests */
+            //info_wtime(log_fp, "Handle %"PRIu16" read requests\n", rd_wr_count);
+            type = handle_csm_read_requests(wc_array, rd_wr_count);
+        }
+        else {
+            /* Write requests */
+            //info_wtime(log_fp, "Handle %"PRIu16" write requests\n", rd_wr_count);
+            type = handle_csm_write_requests(wc_array, rd_wr_count);
+        }
+        /* Rearm */
+        for (i = 0; i < rd_wr_count; i++) {
+            ud_post_one_receive(wc_array[i].wr_id);
+        }
+    }
+    /* Handle other messages */    
+    if (wc_count > rd_wr_count) {
+        /* There is one more message */
+        ud_hdr = (ud_hdr_t*)
+                (IBDEV->ud_recv_bufs[wc_array[wc_count-1].wr_id] + 40);
+        if (IBV_SERVER == IBDEV->ulp_type) {
+            type = handle_message_from_client(&wc_array[wc_count-1], ud_hdr);
+        }
+        else if (IBV_CLIENT == IBDEV->ulp_type) {
+            type = handle_message_from_server(&wc_array[wc_count-1], ud_hdr);
+        }
+        /* Rearm receive operation */
+        ud_post_one_receive(wc_array[wc_count-1].wr_id);
+        return type;
+    }    
+    
+    return type;
+}
+
 //#define WRITE_BENCH
 #if defined(READ_BENCH) || defined(WRITE_BENCH)
 uint64_t ticks[1000];
@@ -1022,6 +1131,69 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
 int hist[9];
 int total_req;
 #endif
+
+/* lxl add */
+static uint8_t
+handle_csm_requests( struct ibv_wc *wcs, uint16_t rd_wr_count ) {
+    int rc;
+    uint16_t i;
+    uint8_t type = MSG_ERROR;
+    ud_hdr_t *ud_hdr;
+    
+    if (!is_leader()) {
+        /* Ignore request */
+        return MSG_NONE;
+    }
+ 
+    //info_wtime(log_fp, "RECEIVED %"PRIu16" write and read Requests\n", rd_wr_count);
+    
+    for (i = 0; i < rd_wr_count; i++) {
+        ud_hdr = (ud_hdr_t*)(IBDEV->ud_recv_bufs[wcs[i].wr_id] + 40);
+        type = ud_hdr->type;
+        if(CSM_READ == type) {
+            handle_one_csm_read_request_new(&wcs[i], 
+                (client_req_t*)(IBDEV->ud_recv_bufs[wcs[i].wr_id] + 40));
+        } else if(CSM_WRITE == type) {
+            handle_one_csm_write_request(&wcs[i], 
+                (client_req_t*)(IBDEV->ud_recv_bufs[wcs[i].wr_id] + 40));            
+        }
+    }
+  
+    /* 这里返回的是批量处理的最后一个请求的类型了 */
+    return type;    
+}
+
+static void 
+handle_one_csm_read_request_new( struct ibv_wc *wc, client_req_t *request ) {
+    int rc;
+
+    dare_ep_t *ep = ep_search(&(SRV_DATA->endpoints), wc->slid);
+    if(ep == NULL) {
+        ep = ep_insert(&(SRV_DATA->endpoints), wc->slid);
+    }
+
+    ep->ud_ep.qpn = wc->src_qp;
+
+    if(ep->last_req_id >= request->hdr.id) {
+        if(!ep->committed) {
+            info(log_fp, "   # CMD not yet committed\n");
+            print_rc_info();
+            return;            
+        }
+        // TODO: 对已经回复过的进行再一次回复，按照状态机目前的情况进行查询
+        return;
+    }
+
+    ep->last_req_id = request->hdr.id;
+    ep->committed = 0;
+
+    // 和write请求一样插入日志
+    SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
+              SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
+              wc->slid, CSM, &request->cmd, 
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets));
+}
+
 static uint8_t
 handle_csm_write_requests( struct ibv_wc *write_wcs, uint16_t write_count )
 {
