@@ -24,6 +24,9 @@
 #define CONFIG  2
 #define HEAD    3
 
+#define C_READ 1
+#define C_WRITE 2
+
 extern int prev_log_entry_head;
 
 /* Entry types: <CSM, cmd> 
@@ -37,7 +40,9 @@ struct dare_log_entry_t {
     uint16_t clt_id;    /* LID of client */
     uint8_t  type;      /* CSM, CONFIG, NOOP, HEAD */
 
+
     /* lxl add */
+    uint8_t csm_type; /* read is 1, write is 2 */
     int16_t replier; /* LID of replier*/
 
     //uint8_t  pad[5];
@@ -569,7 +574,8 @@ log_append_entry_new( dare_log_t* log,
                     uint8_t  type,
                     void *data,
                     server_config_t *config,
-                    uint64_t *apply_offsets)
+                    uint64_t *apply_offsets,
+                    uint8_t csm_type)
 {
     sm_cmd_t *cmd = (sm_cmd_t*)data;
     dare_cid_t *cid = (dare_cid_t*)data;
@@ -648,6 +654,8 @@ log_append_entry_new( dare_log_t* log,
                 entry->clt_id       = clt_id;
                 entry->type         = type;
                 entry->data.cmd.len = cmd->len;
+                /* lxl add */
+                entry->csm_type = csm_type;
             }
             /* Copy the command */
             if (cmd->len) {

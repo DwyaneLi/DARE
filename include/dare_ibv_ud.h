@@ -105,6 +105,8 @@ int ud_create_clt_downsize_request();
 int ud_resend_clt_request();
 int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type );
 void ud_clt_answer_read_request(dare_ep_t *ep);
+/* lxl add */
+void ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd);
 
 /* LogGP */
 double ud_loggp_prtt( int n, double delay, uint32_t size, int inline_flag );

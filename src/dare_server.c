@@ -24,6 +24,8 @@
 #include <dare_sm.h>
 #include <dare_ep_db.h>
 
+/* lxl add */
+#include <dare_ibv_ud.h>
 #include <timer.h>
 
 /* 
@@ -2019,16 +2021,6 @@ apply_committed_entries()
         
         if (!IS_LEADER) {
             /* lxl add */
-            if (CSM == entry->type) {
-                // 进行消息回复
-                // 是自己的消息才回复
-                if (entry->req_id != 0 && entry->replier == data.config.idx) {
-                    rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
-                    if (0 != rc) {
-                        error(log_fp, "im follower, Cannot send client reply\n");
-                    }
-                }
-            }
             goto apply_entry;
         }
 
@@ -2037,14 +2029,7 @@ apply_committed_entries()
             goto apply_next_entry;
         if (CSM == entry->type) {
             /* Client SM entry */
-            if (entry->req_id != 0 && entry->replier == data.config.idx) { // lxl add
-                /* Send reply to the client */
-                rc = dare_ib_send_clt_reply(entry->clt_id, 
-                                        entry->req_id, CSM);
-                if (0 != rc) {
-                    error(log_fp, "Cannot send client reply\n");
-                }
-            }
+            /* lxl add */
             goto apply_entry;
         }
         
@@ -2139,6 +2124,19 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
+            /* lxl add */
+            if(CSM_READ == entry->csm_type) {
+                
+            } else if(CSM_WRITE == entry->csm_type) {
+                rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
+                if (0 != rc) {
+                    error(log_fp, "Cannot apply entry\n");
+                }
+                /* reply client */
+                if(entry->req_id != 0 && entry->replier == data.config.idx) {
+                    rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                }
+            }
             rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
             if (0 != rc) {
                 error(log_fp, "Cannot apply entry\n");

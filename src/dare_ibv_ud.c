@@ -971,17 +971,7 @@ handle_messages:
         //    sleep(10);
         //    return type;
         //}
-            type = handle_csm_requests(wc_array, rd_wr_count);
-        if (read_flag) {
-            /* Read requests */
-            //info_wtime(log_fp, "Handle %"PRIu16" read requests\n", rd_wr_count);
-            type = handle_csm_read_requests(wc_array, rd_wr_count);
-        }
-        else {
-            /* Write requests */
-            //info_wtime(log_fp, "Handle %"PRIu16" write requests\n", rd_wr_count);
-            type = handle_csm_write_requests(wc_array, rd_wr_count);
-        }
+        type = handle_csm_requests(wc_array, rd_wr_count);
         /* Rearm */
         for (i = 0; i < rd_wr_count; i++) {
             ud_post_one_receive(wc_array[i].wr_id);
@@ -1191,7 +1181,7 @@ handle_one_csm_read_request_new( struct ibv_wc *wc, client_req_t *request ) {
     SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
               SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
               wc->slid, CSM, &request->cmd, 
-              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets));
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_READ);
 }
 
 static uint8_t
@@ -1306,7 +1296,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
               SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
               wc->slid, CSM, &request->cmd, 
-              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets));
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_WRITE);
 #ifdef WRITE_BENCH   
     if (measure_count == 999) {
         info(log_fp, "Adding %"PRIu64" bytes to the log\n", 
@@ -2666,4 +2656,39 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
     }
     ud_ep->qpn = wc->src_qp;
     return 0;
+}
+
+/* lxl add */
+void ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
+    int rc
+    dare_ep_t* ep = ep_search(&SRV_DATA->end_points, lid);
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
+    if (ep == NULL) {
+        /* No ep with this LID; create a new one */
+        ep = ep_insert(&SRV_DATA->endpoints, lid);
+        ep->last_req_id = 0;
+    }
+    // TODO: you should get the last_req_id from the protocol SM
+    ep->last_req_id = req_id;
+    ep->committed = 1;
+
+    /* create reply */
+    client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
+    memset(reply, 0, sizeof(client_rep_t));
+    reply->hdr.id = req_id;
+    reply->hdr.type = CSM_REPLY;
+
+    /* get data from SM */
+    rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, cmd, &reply->data);
+    if (0 != rc) {
+        error(log_fp, "Cannot apply read operation to the state machine\n");
+    }
+
+    /* send reply */
+    uint32_t len = sizeof(client_rep_t) + reply->data.len;
+    rc = ud_send_message(&ep->ud_ep, len);
+    if (0 != rc) {
+        error(log_fp, "Cannot send message over UD to %"PRIu16"\n", 
+                     ep->ud_ep.lid);
+    }        
 }
