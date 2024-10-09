@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "dare_client.h": "c",
-        "dare_ep_db.h": "c",
-        "dare_ibv.h": "c"
-    }
-}
