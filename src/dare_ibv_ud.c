@@ -2659,9 +2659,8 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
 }
 
 /* lxl add */
-void ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
+int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     int rc
-    dare_ep_t* ep = ep_search(&SRV_DATA->end_points, lid);
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
     if (ep == NULL) {
         /* No ep with this LID; create a new one */
@@ -2681,14 +2680,16 @@ void ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     /* get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, cmd, &reply->data);
     if (0 != rc) {
-        error(log_fp, "Cannot apply read operation to the state machine\n");
+        error_return(1, log_fp, "Cannot apply read operation to the state machine\n");
     }
 
     /* send reply */
     uint32_t len = sizeof(client_rep_t) + reply->data.len;
     rc = ud_send_message(&ep->ud_ep, len);
     if (0 != rc) {
-        error(log_fp, "Cannot send message over UD to %"PRIu16"\n", 
+        error_return(1, log_fp, "Cannot send message over UD to %"PRIu16"\n", 
                      ep->ud_ep.lid);
     }        
+
+    return 0;
 }

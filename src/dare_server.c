@@ -2126,6 +2126,13 @@ apply_entry:
             //}
             /* lxl add */
             if(CSM_READ == entry->csm_type) {
+                // 是自己回复的才进行应用状态机和回复，不然没必要直接跳过去就可以了
+                if(entry->req_id != 0 && entry->replier == data.config.idx) {
+                    rc = ud_clt_reply_read_request(entry->clt_id, entry->req_id, &(entry->data.cmd));
+                    if(0 != rc) {
+                        error(log_fp, "Cannot apply and reply read entry");
+                    }
+                }
                 
             } else if(CSM_WRITE == entry->csm_type) {
                 rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
@@ -2137,15 +2144,12 @@ apply_entry:
                     rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
                 }
             }
-            rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
-            if (0 != rc) {
-                error(log_fp, "Cannot apply entry\n");
-            }
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
             last_applied_entry.offset = data.log->apply;
             /* Needed for answering read requests */
-            data.last_cmt_write_csm_idx = entry->idx;
+            /* lxl add 这个现在也不需要了 最后三行一样 */
+            //data.last_cmt_write_csm_idx = entry->idx;
         }
         
 apply_next_entry:        
@@ -2155,9 +2159,9 @@ apply_next_entry:
     
     /* When new entries are applied, the leader verifies if there are 
     pending read requests */
-    if ((old_apply != data.log->apply) && IS_LEADER) {
-        ep_dp_reply_read_req(&data.endpoints, data.last_cmt_write_csm_idx);
-    }
+    // if ((old_apply != data.log->apply) && IS_LEADER) {
+    //     ep_dp_reply_read_req(&data.endpoints, data.last_cmt_write_csm_idx);
+    // }
     
 }
 
