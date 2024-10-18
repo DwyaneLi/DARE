@@ -117,6 +117,8 @@ trace_print:
 debug: FLAGS += -DDEBUG -g -O0
 debug: dare test trace
 
+lxl: dare test trace
+
 clean:
 	@echo "##### CLEAN-UP #####"
 	-rm -f $(SRV_TEST_OBJS)
