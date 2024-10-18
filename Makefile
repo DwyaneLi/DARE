@@ -6,7 +6,7 @@
 
 CC = gcc
 
-FLAGS        = -std=gnu99 -fcommon -DDEBUG -I./include -I./utils/rbtree/include -I/usr/include
+FLAGS        = -std=gnu99 -fcommon -I./include -I./utils/rbtree/include -I/usr/include
 CFLAGS       = -Wl,--no-as-needed -Wall -Wunused-function -Wextra
 LDFLAGS      = -L/usr/lib/x86_64-linux-gnu -libverbs -lm
 
@@ -116,6 +116,8 @@ trace_print:
 # The flag -D stands for define
 debug: FLAGS += -DDEBUG -g -O0
 debug: dare test trace
+
+lxl: dare test trace
 
 clean:
 	@echo "##### CLEAN-UP #####"
