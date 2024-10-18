@@ -6,11 +6,11 @@
 
 CC = gcc
 
-FLAGS        = -std=gnu99 -fcommon -DDEBUG -I./include -I./utils/rbtree/include #IBV_INCLUDE#
+FLAGS        = -std=gnu99 -fcommon -O0 -I./include -I./utils/rbtree/include -I/usr/include
 CFLAGS       = -Wl,--no-as-needed -Wall -Wunused-function -Wextra
-LDFLAGS      = #IBV_LIB# -lm
+LDFLAGS      = -L/usr/lib/x86_64-linux-gnu -libverbs -lm
 
-PREFIX  = #PREFIX#
+PREFIX  = /home/raft/dare
 LIBPATH = $(PREFIX)/lib
 BINDIR = $(PREFIX)/bin
 
@@ -54,8 +54,8 @@ $(RBTREE): rbtree_print $(RBTREE_OBJS) $(RBTREE_HEADERS)
 rbtree_print:
 	@echo "##### BUILDING Red-Black Tree #####"
 	
-dare: FLAGS += #EV_INCLUDE#
-dare: LDFLAGS += #EV_LIB#
+dare: FLAGS += -I/usr/local/include
+dare: LDFLAGS += /usr/local/lib/libev.a
 dare: $(DARE) 
 $(DARE): $(RBTREE) dare_print $(OBJS) $(HEADERS) 
 	mkdir -pm 755 $(LIBPATH)
@@ -65,8 +65,8 @@ $(DARE): $(RBTREE) dare_print $(OBJS) $(HEADERS)
 dare_print:
 	@echo "##### BUILDING DARE #####"
 
-test: FLAGS += #EV_INCLUDE#
-test: LDFLAGS +=  -L$(LIBPATH) -ldare #EV_LIB#
+test: FLAGS += -I/usr/local/include
+test: LDFLAGS +=  -L$(LIBPATH) -ldare /usr/local/lib/libev.a
 test: $(SRV_TEST) $(CLT_TEST) $(MPI_LAUNCH)
 $(SRV_TEST): srv_test_print $(SRV_TEST_OBJS) $(HEADERS) $(DARE)
 	mkdir -pm 755 $(BINDIR)
