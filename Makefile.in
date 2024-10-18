@@ -6,7 +6,7 @@
 
 CC = gcc
 
-FLAGS        = -std=gnu99 -I./include -I./utils/rbtree/include #IBV_INCLUDE#
+FLAGS        = -std=gnu99 -fcommon -I./include -I./utils/rbtree/include #IBV_INCLUDE#
 CFLAGS       = -Wl,--no-as-needed -Wall -Wunused-function -Wextra
 LDFLAGS      = #IBV_LIB# -lm
 

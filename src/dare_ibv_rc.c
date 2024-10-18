@@ -985,7 +985,7 @@ int rc_get_leader_hb(uint8_t leader) {
     ssn++;
     TIMER_START(log_fp, "Getting leader HB (%"PRIu64")\n", ssn);
 
-    if(!CID_IS_SEVER_ON(SRV_DATA->config.cid, leader)) {
+    if(!CID_IS_SERVER_ON(SRV_DATA->config.cid, leader)) {
         error_return(1, log_fp, "leader is off, cant read hb_counter\n");
     }
     

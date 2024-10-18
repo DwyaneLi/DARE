@@ -401,7 +401,7 @@ int dare_ib_send_hb_reply( uint8_t idx )
 
 /* lxl add */
 int dare_ib_get_leader_hb(uint8_t leader) {
-    return rc_get_leader_hb(uint8_t leader);
+    return rc_get_leader_hb(leader);
 }
 
 #endif 

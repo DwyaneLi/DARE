@@ -49,7 +49,7 @@ ForceAbsolutePath () {
 ########################
 
 PREFIX=$PWD
-EVDIR=""
+EVDIR="/usr/local"
 IBVDIR="/usr"
 MF="Makefile"
 
