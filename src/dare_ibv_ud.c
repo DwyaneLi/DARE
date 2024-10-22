@@ -772,6 +772,7 @@ mcast_send_message( uint32_t len )
      
     do {
         num_comp = ibv_poll_cq(IBDEV->ud_scq, 1, &wc);
+        debug(log_fp, "wait for the mcast cq\n");        
     } while (num_comp == 0);
       
     if (num_comp < 0) {
@@ -1497,7 +1498,8 @@ int ud_exchange_rc_info()
     }
     len += 2*request->size*sizeof(uint32_t);
 
-    //info(log_fp, ">> Sending RC SYN (mcast)\n");
+    // lxl add
+    info(log_fp, ">> Sending RC SYN (mcast)\n");
     return mcast_send_message(len);
 }
 
@@ -2056,6 +2058,8 @@ send_clt_request( uint32_t len )
     }
     else {
         /* No leader known */
+        // lxl add
+        debug(log_fp, "# Sending client request\n");
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
