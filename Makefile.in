@@ -117,7 +117,7 @@ trace_print:
 debug: FLAGS += -DDEBUG -g -O0
 debug: dare test trace
 
-lxl: FLAGS += -g -O0
+lxl: FLAGS += --DDEBUG
 lxl: dare test trace
 
 clean:
