@@ -733,7 +733,9 @@ mcast_send_message( uint32_t len )
     struct ibv_send_wr wr;
     struct ibv_send_wr *bad_wr = NULL;
     
-    text(log_fp, "## Sending mcast message (len=%"PRIu32")\n", len);
+    // lxl add
+    // text(log_fp, "## Sending mcast message (len=%"PRIu32")\n", len);
+    debug(log_fp, "## Sending mcast message (len=%"PRIu32")\n", len); 
     if (len > mtu_value(IBDEV->mtu)) {
         debug(log_fp, "Length = %"PRIu32"; cannot send more than %"PRIu32" bytes\n", 
               len, mtu_value(IBDEV->mtu));
@@ -2059,7 +2061,7 @@ send_clt_request( uint32_t len )
     else {
         /* No leader known */
         // lxl add
-        debug(log_fp, "# Sending client request\n");
+        info(log_fp, "# Sending client request\n");
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
