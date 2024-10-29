@@ -991,7 +991,7 @@ int rc_get_leader_hb(uint8_t leader) {
     
     ep = (dare_ib_ep_t *)SRV_DATA->config.servers[leader].ep;
     if(0 == ep->rc_connected) {
-        error_return(1, log_fp, "rc is unconnected, cant read hb_counter\n");
+        error_return(1, log_fp, "leader:%d rc is unconnected, cant read hb_counter\n", leader);
     }
 
     text(log_fp, "   (p%"PRIu8")\n", leader);
