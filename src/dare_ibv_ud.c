@@ -1664,7 +1664,7 @@ handle_rc_synack(struct ibv_wc *wc, rc_syn_t *msg)
         
         /* Mark RC established */
         /*lxl add*/
-        info(log_fp, "now ep: %d is connect\n", msg->idx);
+        // info(log_fp, "now ep: %d is connect\n", msg->idx);
         ep->rc_connected = 1;
 #if 0
         info(log_fp, "[%02"PRIu8"]  log: "
@@ -1755,7 +1755,7 @@ handle_rc_ack(struct ibv_wc *wc, rc_ack_t *msg)
     if (0 == ep->rc_connected) {
         /* Mark RC established */
         /* lxl add */
-        info(log_fp, "now ep: %d is connect\n", msg->idx);
+        // info(log_fp, "now ep: %d is connect\n", msg->idx);
         ep->rc_connected = 1;
         
         /* Verify the number of RC established; if RC established with at 
@@ -2189,14 +2189,14 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     if (ud_ep->lid != wc->slid) {
         /* New leader: set the UD endpoint data */
         /* lxl add */
-        info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        //info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         wc_to_ud_ep(ud_ep, wc);
-        info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+        //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
     }
     
     /* lxl add*/
     if (reply->data.len != 0) {
-        info(log_fp, "Received data from len %u: %.*s\n", 
+        debug(log_fp, "Received data from len %u: %.*s\n", 
             reply->data.len, reply->data.data);
     }
     

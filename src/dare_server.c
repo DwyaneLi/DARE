@@ -1765,7 +1765,7 @@ poll_vote_count()
 
 become_leader:
     /* lxl add */
-    info(log_fp, "now becomeleader\n");
+    //info(log_fp, "now becomeleader\n");
     ep_dp_reset_wait_idx(&data.endpoints);
     /* Start sending heartbeats */
     ev_set_cb(&hb_event, hb_send_cb);
@@ -2790,7 +2790,7 @@ info(log_fp, "   # (%i) RDMA %s: o = %lf usecs\n\n", i, (write ? "Write" : "Read
 void server_to_follower()
 {   
     /*lxl add*/
-    info(log_fp, "now become follower, leader is %d\n", SID_GET_IDX(data.ctrl_data->sid));
+    //info(log_fp, "now become follower, leader is %d\n", SID_GET_IDX(data.ctrl_data->sid));
     int rc;
 
     /* Stop HB mechanism for the moment ... */
