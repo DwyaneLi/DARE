@@ -2188,13 +2188,15 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
     if (ud_ep->lid != wc->slid) {
         /* New leader: set the UD endpoint data */
-        //info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        /* lxl add */
+        info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         wc_to_ud_ep(ud_ep, wc);
-        //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+        info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
     }
     
+    /* lxl add*/
     if (reply->data.len != 0) {
-        debug(log_fp, "Received data len %u: %.*s\n", 
+        info(log_fp, "Received data from len %u: %.*s\n", 
             reply->data.len, reply->data.data);
     }
     

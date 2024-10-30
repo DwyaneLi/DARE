@@ -860,6 +860,7 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents)
     total_count++;
 
     int rc;
+    info(log_fp, "now in adjust_cb to get leader hb\n");
     rc = dare_ib_get_leader_hb(leader); 
     if(rc != 0) {
         /* 当做leader宕机处理 */
@@ -1140,6 +1141,7 @@ hb_update_cb(EV_P_ ev_timer *w, int revents ) {
     // 这里因为不是主动操作，不需要shutdown
 }
 
+/* lxl add */
 /* 用于follower定期读取leader的hb_counter，观看是否有变化 */
 static void
 hb_read_cb( EV_P_ ev_timer *w, int revents ) {
@@ -1222,6 +1224,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
     }
 
     /* 没有收到心跳，于是确定leader是不是存活，发送rdma read去读leader的hb*/
+    info(log_fp, "now in hb_read_cb to get leader hb\n");
     rc = dare_ib_get_leader_hb(leader);
     if(rc != 0) {
         /* 当做leader宕机处理 */
