@@ -1501,7 +1501,7 @@ int ud_exchange_rc_info()
     len += 2*request->size*sizeof(uint32_t);
 
     // lxl add
-    info(log_fp, ">> Sending RC SYN (mcast)\n");
+    // info(log_fp, ">> Sending RC SYN (mcast)\n");
     return mcast_send_message(len);
 }
 
