@@ -859,6 +859,12 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents)
     /* Total number of trials */
     total_count++;
 
+    // 如果一直没找到leader的话(他自己也不可能是leader，因为是leader就不可能进这个cb)，他就会一直用rc找自己，这样在下一个代码块一直会报错，所以得改一下。
+    if(leader == data.config.idx) {
+        leader_failed = 1;
+        goto repeat;
+    }
+
     int rc;
     //info(log_fp, "now in adjust_cb to get leader hb\n");
     rc = dare_ib_get_leader_hb(leader); 
