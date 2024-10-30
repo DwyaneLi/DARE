@@ -860,7 +860,7 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents)
     total_count++;
 
     int rc;
-    info(log_fp, "now in adjust_cb to get leader hb\n");
+    //info(log_fp, "now in adjust_cb to get leader hb\n");
     rc = dare_ib_get_leader_hb(leader); 
     if(rc != 0) {
         /* 当做leader宕机处理 */
@@ -1224,7 +1224,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
     }
 
     /* 没有收到心跳，于是确定leader是不是存活，发送rdma read去读leader的hb*/
-    info(log_fp, "now in hb_read_cb to get leader hb\n");
+    //info(log_fp, "now in hb_read_cb to get leader hb\n");
     rc = dare_ib_get_leader_hb(leader);
     if(rc != 0) {
         /* 当做leader宕机处理 */
@@ -1758,6 +1758,8 @@ poll_vote_count()
         data.config.clt_id, CONFIG, &data.config.cid);
 
 become_leader:
+    /* lxl add */
+    info(log_fp, "now becomeleader\n");
     ep_dp_reset_wait_idx(&data.endpoints);
     /* Start sending heartbeats */
     ev_set_cb(&hb_event, hb_send_cb);
@@ -2781,6 +2783,8 @@ info(log_fp, "   # (%i) RDMA %s: o = %lf usecs\n\n", i, (write ? "Write" : "Read
  */
 void server_to_follower()
 {   
+    /*lxl add*/
+    info(log_fp, "now become follower, leader is %d\n", SID_GET_IDX(data.ctrl_data->sid));
     int rc;
 
     /* Stop HB mechanism for the moment ... */
