@@ -890,11 +890,16 @@ int rc_send_hb()
     //TIMER_START(log_fp, "Sending HB (%"PRIu64")\n", ssn);
     for (i = 0; i < size; i++) {
         if (i == SRV_DATA->config.idx) continue;
+        /* lxl add */
+        info(log_fp, "now send hb to %d\n", i);
         if (!CID_IS_SERVER_ON(SRV_DATA->config.cid, i)) {
+            /* lxl add */
+            info(log_fp, "p%d is off, dont send hb\n", i);
             continue;
         }
         ep = (dare_ib_ep_t*)SRV_DATA->config.servers[i].ep;
         if (0 == ep->rc_connected) {
+            info(log_fp, "p%d rc is not connected, dont send hb\n", i);
             continue;
         }
         //text(log_fp, "   (p%"PRIu8")\n", i);
