@@ -1544,6 +1544,8 @@ handle_rc_syn(struct ibv_wc *wc, rc_syn_t *msg)
         return 0;
     }
     
+    /* lxl add */
+    info(log_fp, "receive RC_SYNC from p%d\n", msg->idx);
     /* Verify if RC already established */
     ep = (dare_ib_ep_t*)SRV_DATA->config.servers[msg->idx].ep;
     if (0 == ep->rc_connected) {
@@ -1664,7 +1666,7 @@ handle_rc_synack(struct ibv_wc *wc, rc_syn_t *msg)
         
         /* Mark RC established */
         /*lxl add*/
-        // info(log_fp, "now ep: %d is connect\n", msg->idx);
+        info(log_fp, "now ep: %d is connect\n", msg->idx);
         ep->rc_connected = 1;
 #if 0
         info(log_fp, "[%02"PRIu8"]  log: "
@@ -1755,7 +1757,7 @@ handle_rc_ack(struct ibv_wc *wc, rc_ack_t *msg)
     if (0 == ep->rc_connected) {
         /* Mark RC established */
         /* lxl add */
-        // info(log_fp, "now ep: %d is connect\n", msg->idx);
+        info(log_fp, "now ep: %d is connect\n", msg->idx);
         ep->rc_connected = 1;
         
         /* Verify the number of RC established; if RC established with at 
