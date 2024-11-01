@@ -1013,9 +1013,12 @@ hb_receive_cb( EV_P_ ev_timer *w, int revents )
         return;
     }
     
+    /* lxl add*/
+    // 在正确收到心跳之后，应该要将回调设置为rc_read_cb
 rearm:    
     /* Rearm HB event */
     //w->repeat = random_election_timeout();
+    ev_set_cb(w, hb_read_cb);
     w->repeat = hb_timeout();
     //info_wtime(log_fp, "RECV HB (next=%lf sec)\n", w->repeat);
     ev_timer_again(EV_A_ w);
@@ -1082,12 +1085,11 @@ hb_send_cb( EV_P_ ev_timer *w, int revents )
         //info_wtime(log_fp, "TIME ERROR %"PRIu64" out of %"PRIu64"\n", errs, total);
         //dare_server_shutdown();
     }
-    
-    /* Rearm timer */
-    w->repeat = hb_period;
-    ev_timer_again(EV_A_ w);
 
     /* lxl add */
+    /* Rearm timer */
+    // w->repeat = hb_period;
+    // ev_timer_again(EV_A_ w);
     /* 将回调切换成hb_update_cb */
     ev_set_cb(w, hb_update_cb);
     w->repeat = NOW;
