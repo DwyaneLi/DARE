@@ -1545,7 +1545,7 @@ handle_rc_syn(struct ibv_wc *wc, rc_syn_t *msg)
     }
     
     /* lxl add */
-    info(log_fp, "receive RC_SYNC from p%d\n", msg->idx);
+    // info(log_fp, "receive RC_SYNC from p%d\n", msg->idx);
     /* Verify if RC already established */
     ep = (dare_ib_ep_t*)SRV_DATA->config.servers[msg->idx].ep;
     if (0 == ep->rc_connected) {
