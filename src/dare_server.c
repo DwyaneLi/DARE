@@ -877,6 +877,7 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents)
     }
     
     if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+        info(log_fp, "read hb successful, old hb : %d, new hb : %d\n", data.ctrl_data->last_hb, data.ctrl_data->leader_hb);
         latest_hb_read = 1;
         data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
         if(leader_failed) {
@@ -1250,6 +1251,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
 
     /* 检查hb */
     if(latest_hb_read != 0  && data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+        info(log_fp, "read hb successful, old hb : %d, new hb : %d\n", data.ctrl_data->last_hb, data.ctrl_data->leader_hb);
         timeout = 0;
         data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
     }
