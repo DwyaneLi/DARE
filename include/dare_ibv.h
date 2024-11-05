@@ -178,6 +178,7 @@ int dare_ib_send_hb();
 int dare_ib_send_hb_reply( uint8_t idx );
 /* lxl add */
 int dare_ib_get_leader_hb(uint8_t leader);
+int dare_ib_check_new_rc_connect();
 
 /* Leader election */
 int dare_ib_send_vote_request();

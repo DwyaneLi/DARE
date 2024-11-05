@@ -404,6 +404,9 @@ int dare_ib_get_leader_hb(uint8_t leader) {
     return rc_get_leader_hb(leader);
 }
 
+int dare_ib_check_new_rc_connect() {
+    return rc_check_new_rc_connect();
+}
 #endif 
 
 /* ================================================================== */

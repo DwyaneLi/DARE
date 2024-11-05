@@ -1028,6 +1028,23 @@ int rc_get_leader_hb(uint8_t leader) {
     return 0;
 }
 
+/* lxl add */
+int rc_check_new_rc_connect() {
+    if(SRV_DATA->ctrl_data->last_rc_count_map == SRV_DATA->ctrl_data->rc_count_map) {
+        // rc连接相较上次没有变化，因此不需要进行新的hb补充发送
+        return 0;
+    }
+
+    uint8_t size = get_group_size(SRV_DATA->config);
+    // 获取要补发的server的idx
+    int32_t supply_ep = SRV_DATA->ctrl_data->last_rc_count_map ^  SRV_DATA->ctrl_data->rc_count_map;
+    uint8_t size = 1;
+    
+
+
+    return 0;
+}
+
 #endif
 
 /* ================================================================== */

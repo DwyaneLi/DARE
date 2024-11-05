@@ -128,6 +128,8 @@ struct ctrl_data_t {
     int64_t hb_counter; // add for hb
     int64_t last_hb; // last hb read from leader
     int64_t leader_hb; // now hb read from leader
+    int32_t rc_count_map; // record which server's rc is connected(bit1 is connected)
+    int32_t last_rc_count_map; // last rc_count_map
 
     /* DARE arrays */
     vote_req_t    vote_req[MAX_SERVER_COUNT];       /* vote requests */

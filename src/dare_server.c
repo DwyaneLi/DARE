@@ -330,7 +330,7 @@ init_server_data()
     data.ctrl_data->sid = SID_NULL;
     /* lxl add*/
     data.ctrl_data->hb_counter = 0;
- 
+    data.ctrl_data->rc_count_map = 0;
     /* Set up log */
     data.log = log_new();
     if (NULL == data.log) {
@@ -1788,6 +1788,7 @@ become_leader:
 
     /* lxl add*/
     data.ctrl_data->hb_counter = 0;
+    data.ctrl_data->last_rc_count_map = data.ctrl_data->rc_count_map;
     // todo: 在这里应该先发一遍hb然后设为hb_update_cb
     // hb_send
     /*

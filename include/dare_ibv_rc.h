@@ -65,6 +65,7 @@ int rc_send_hb();
 int rc_send_hb_reply( uint8_t idx );
 /* lxl add */
 int rc_get_leader_hb(uint8_t leader);
+int rc_check_new_rc_connect();
 
 /* Leader election */
 int rc_send_vote_request();
