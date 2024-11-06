@@ -1065,7 +1065,7 @@ int rc_check_new_rc_connect() {
             if (0 == ep->rc_connected) {
                 continue;
             } // 应该不会发生
-            info(log_fp, "new rc is connected, is %d\n", i);
+            //info(log_fp, "new rc is connected, is %d\n", i);
             rem_mem_t rm;
             rm.raddr = ep->rc_ep.rmt_mr[CTRL_QP].raddr + offset;
             rm.rkey = ep->rc_ep.rmt_mr[CTRL_QP].rkey;
