@@ -1032,16 +1032,55 @@ int rc_get_leader_hb(uint8_t leader) {
 int rc_check_new_rc_connect() {
     if(SRV_DATA->ctrl_data->last_rc_count_map == SRV_DATA->ctrl_data->rc_count_map) {
         // rc连接相较上次没有变化，因此不需要进行新的hb补充发送
+        info(log_fp, "no new rc connect\n");
         return 0;
     }
 
+    int rc;
+    dare_ib_ep_t *ep;
+    uint8_t i;
     uint8_t size = get_group_size(SRV_DATA->config);
+
+    /* set offset accordingly*/
+    uint32_t offset =  (uint32_t)(offsetof(ctrl_data_t, hb) + sizeof(uint64_t) * SRV_DATA->config.idx);
+
     // 获取要补发的server的idx
-    int32_t supply_ep = SRV_DATA->ctrl_data->last_rc_count_map ^  SRV_DATA->ctrl_data->rc_count_map;
-    uint8_t size = 1;
+    int32_t supply_ep = SRV_DATA->ctrl_data->last_rc_count_map ^ SRV_DATA->ctrl_data->rc_count_map;
     
+    // 有新增的rc连接，要发心跳
+    ssn++;
+    int32_t flag;
+    for(i = 0; i < size; i++) {
+        flag = 1 << i;
 
+        if(flag & supply_ep && is_leader()) {
+            /* 有新连的rc节点，如果我是leader我就要给他发心跳 */
+            if(i == SRV_DATA->config.idx) continue; // 不可能出现这种情况
+            if (!CID_IS_SERVER_ON(SRV_DATA->config.cid, i)) {
+                continue;
+            } // 应该也不会发生
 
+            ep = (dare_ib_ep_t*)SRV_DATA->config.servers[i].ep;
+
+            if (0 == ep->rc_connected) {
+                continue;
+            } // 应该不会发生
+
+            rem_mem_t rm;
+            rm.raddr = ep->rc_ep.rmt_mr[CTRL_QP].raddr + offset;
+            rm.rkey = ep->rc_ep.rmt_mr[CTRL_QP].rkey;
+            /* server_id, qp_id, buf, len, mr, opcode, signaled, rm, posted_sends */ 
+            rc = post_send(i, CTRL_QP, &SRV_DATA->ctrl_data->sid,
+                            sizeof(uint64_t), IBDEV->lcl_mr[CTRL_QP],
+                            IBV_WR_RDMA_WRITE, NOTSIGNALED, rm, NULL);
+            if (0 != rc) {
+                /* This should never happen */
+                error_return(1, log_fp, "Cannot post send operation\n");
+            }                        
+
+        }
+    }
+    
     return 0;
 }
 

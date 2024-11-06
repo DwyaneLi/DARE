@@ -1145,6 +1145,14 @@ hb_update_cb(EV_P_ ev_timer *w, int revents ) {
         data.ctrl_data->hb_counter = 0;
     }
 
+    /* 为了防止切换到这个cb后，因为不主动发送心跳，部分server在加入集群后无法寻找到leader，于是需要看看有没有新增rc连接，有就发送心跳 */
+    rc = dare_ib_check_new_rc_connect();
+    if(0 != rc) {
+        /* error */
+        info(log_fp, "error in check new rc connect\n");
+        return;
+    }
+    
     /* Rearm timer */
     w->repeat = hb_period;
     ev_timer_again(EV_A_ w);
