@@ -1032,7 +1032,7 @@ int rc_get_leader_hb(uint8_t leader) {
 int rc_check_new_rc_connect() {
     if(SRV_DATA->ctrl_data->last_rc_count_map == SRV_DATA->ctrl_data->rc_count_map) {
         // rc连接相较上次没有变化，因此不需要进行新的hb补充发送
-        info(log_fp, "no new rc connect\n");
+        // info(log_fp, "no new rc connect\n");
         return 0;
     }
 
@@ -1065,7 +1065,7 @@ int rc_check_new_rc_connect() {
             if (0 == ep->rc_connected) {
                 continue;
             } // 应该不会发生
-
+            info(log_fp, "new rc is connected, is %d\n", i);
             rem_mem_t rm;
             rm.raddr = ep->rc_ep.rmt_mr[CTRL_QP].raddr + offset;
             rm.rkey = ep->rc_ep.rmt_mr[CTRL_QP].rkey;

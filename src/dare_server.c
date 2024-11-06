@@ -877,7 +877,7 @@ to_adjust_cb( EV_P_ ev_timer *w, int revents)
     }
     
     if(data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
-        info(log_fp, "read hb successful, old hb : %d, new hb : %d\n", data.ctrl_data->last_hb, data.ctrl_data->leader_hb);
+        // info(log_fp, "read hb successful, old hb : %d, new hb : %d\n", data.ctrl_data->last_hb, data.ctrl_data->leader_hb);
         latest_hb_read = 1;
         data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
         if(leader_failed) {
@@ -1152,7 +1152,7 @@ hb_update_cb(EV_P_ ev_timer *w, int revents ) {
         info(log_fp, "error in check new rc connect\n");
         return;
     }
-    
+
     /* Rearm timer */
     w->repeat = hb_period;
     ev_timer_again(EV_A_ w);
