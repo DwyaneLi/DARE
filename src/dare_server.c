@@ -1237,7 +1237,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
     }    
 
     /* 如果使用to_adjust_cb读到了，这里就算了 */
-    if(!latest_hb_read) {
+    if(latest_hb_read == 1) {
         latest_hb_read = 0;
         w->repeat = hb_timeout();
         ev_timer_again(EV_A_ w);
@@ -1258,7 +1258,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
     }
 
     /* 检查hb */
-    if(latest_hb_read != 0  && data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
+    if(latest_hb_read == 0  && data.ctrl_data->last_hb != data.ctrl_data->leader_hb) {
         //info(log_fp, "read hb successful, old hb : %d, new hb : %d\n", data.ctrl_data->last_hb, data.ctrl_data->leader_hb);
         timeout = 0;
         data.ctrl_data->last_hb = data.ctrl_data->leader_hb;
