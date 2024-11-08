@@ -891,7 +891,7 @@ int rc_send_hb()
     for (i = 0; i < size; i++) {
         if (i == SRV_DATA->config.idx) continue;
         /* lxl add */
-        info(log_fp, "now send hb to %d\n", i);
+        //info(log_fp, "now send hb to %d\n", i);
         if (!CID_IS_SERVER_ON(SRV_DATA->config.cid, i)) {
             /* lxl add */
             info(log_fp, "p%d is off, dont send hb\n", i);

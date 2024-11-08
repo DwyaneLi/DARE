@@ -761,7 +761,7 @@ recover_log_cb( EV_P_ ev_timer *w, int revents )
     if (0 == SID_GET_TERM(data.ctrl_data->sid)) {
         /* Still in term 0 - start election */
         /* lxl add */
-        info(log_fp, "now start election in 1\n");
+        //info(log_fp, "now start election in 1\n");
         start_election();
     }
     else {
@@ -991,7 +991,7 @@ hb_receive_cb( EV_P_ ev_timer *w, int revents )
         w->repeat = 0.;
         ev_timer_again(EV_A_ w);
         /* lxl add */
-        info(log_fp, "now start election in 2\n");
+        //info(log_fp, "now start election in 2\n");
         start_election(); 
         return;
     }
@@ -1252,7 +1252,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
         w->repeat = 0;
         ev_timer_again(EV_A_ w);
         /* lxl add */
-        info(log_fp, "now start election in 3\n");
+        //info(log_fp, "now start election in 3\n");
         start_election();
         return;       
     }
@@ -1269,7 +1269,7 @@ hb_read_cb( EV_P_ ev_timer *w, int revents ) {
         w->repeat = 0;
         ev_timer_again(EV_A_ w);
         /* lxl add */
-        info(log_fp, "now start election in 4\n");
+        //info(log_fp, "now start election in 4\n");
         start_election();
         return;
     } else {
@@ -1460,7 +1460,7 @@ poll_ud()
                     ev_timer_again(data.loop, &timer_event);
                     dare_state |= LOG_RECOVERED | SM_RECOVERED;
                     /* lxl add */
-                    info(log_fp, "now start election in 5\n");
+                    //info(log_fp, "now start election in 5\n");
                     start_election();
                 }
                 else {
@@ -2033,7 +2033,7 @@ text(log_fp, "   Best [idx=%"PRIu64"; term=%"PRIu64"]\n", best_request.index, be
     if (rc < 0) {
         /* Operation failed; start an election */
         /* lxl add */
-        info(log_fp, "now start election in 6\n");
+        //info(log_fp, "now start election in 6\n");
         start_election(); 
         return;
     }
@@ -2850,7 +2850,7 @@ void server_to_follower()
         if (rc < 0) {
             /* Operation failed; start an election */
             /* lxl add */
-            info(log_fp, "now start election in 7\n");
+            //info(log_fp, "now start election in 7\n");
             start_election(); 
             return;
         }
