@@ -1134,7 +1134,7 @@ int rc_send_vote_request()
     for (i = 0; i < size; i++) {
         if (idx == i) continue;
         /* lxl add */
-        info(log_fp, "now send vote to %d\n", i);
+        // info(log_fp, "now send vote to %d\n", i);
         if (!CID_IS_SERVER_ON(SRV_DATA->config.cid, i)) {
             /* lxl add */
             info(log_fp, "p%d is down, dont send vote\n", i);

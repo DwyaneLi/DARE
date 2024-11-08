@@ -1670,7 +1670,7 @@ handle_rc_synack(struct ibv_wc *wc, rc_syn_t *msg)
         ep->rc_connected = 1;
         /* lxl add */
         SRV_DATA->ctrl_data->rc_count_map |= 1 << (msg->idx); 
-        info(log_fp, "now ep: %d is connect, now rc_count_map = %x\n", msg->idx, SRV_DATA->ctrl_data->rc_count_map);
+        //info(log_fp, "now ep: %d is connect, now rc_count_map = %x\n", msg->idx, SRV_DATA->ctrl_data->rc_count_map);
 #if 0
         info(log_fp, "[%02"PRIu8"]  log: "
                          "RQPN=%"PRIu32"; "
@@ -1762,7 +1762,7 @@ handle_rc_ack(struct ibv_wc *wc, rc_ack_t *msg)
         ep->rc_connected = 1;
         /* lxl add */
         SRV_DATA->ctrl_data->rc_count_map |= 1 << (msg->idx); 
-        info(log_fp, "now ep: %d is connect, now rc_count_map = %x\n", msg->idx, SRV_DATA->ctrl_data->rc_count_map);
+        //info(log_fp, "now ep: %d is connect, now rc_count_map = %x\n", msg->idx, SRV_DATA->ctrl_data->rc_count_map);
 
         /* Verify the number of RC established; if RC established with at 
          * least half of the group, then we can proceed further */
