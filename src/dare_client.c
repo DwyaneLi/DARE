@@ -24,7 +24,7 @@
 #include <dare_kvs_sm.h>
 
 //#define MEASURE_COUNT 1000
-#define MEASURE_COUNT 100
+#define MEASURE_COUNT 10
 unsigned long long g_timerfreq;
 uint64_t ticks[MEASURE_COUNT];
 double usecs; 
