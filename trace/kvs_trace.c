@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     FILE *fp;
     fp = fopen(output, "wb");
     if (NULL == fp) {
-        printf("Unable to open file!");
+        printf("Unable to open file!\n");
         return 1;
     }
     

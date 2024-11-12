@@ -2061,7 +2061,7 @@ send_clt_request( uint32_t len )
     else {
         /* No leader known */
         // lxl add
-        info(log_fp, "# Sending client request\n");
+        //info(log_fp, "# Sending client request\n");
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
