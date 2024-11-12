@@ -230,6 +230,7 @@ CreatrTraceForClients
 StartClients
 sleep 10
 StopClients
+pkill clt_test
 
 sleep 0.2
 StopDare
