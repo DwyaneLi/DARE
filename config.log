@@ -1,0 +1,1 @@
+./configure --prefix=/home/raft/dare --with-ev=/usr/local --with-ibv=/usr
