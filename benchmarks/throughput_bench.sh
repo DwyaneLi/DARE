@@ -106,7 +106,7 @@ CreatrTraceForClients() {
     echo "create trace for clients"
     for i in "${clients[@]}"; do
         create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
-        cmd=("ssh" "$USER@$i" "rm -f $trace_file")
+        cmd=("ssh" "$USER@$i" "rm -rf $trace_file")
         echo "Executing: ${cmd[@]}"
         ${cmd[@]}
         cmd=("ssh" "$USER@$i" "${create_trace[@]}")
@@ -120,7 +120,7 @@ DAREDIR=""
 OPCODE="put"
 server_count=9
 client_count=4
-blob_size=128
+blob_size=256
 proc=100
 for arg in "$@"
 do
@@ -230,6 +230,7 @@ CreatrTraceForClients
 StartClients
 sleep 10
 StopClients
+pkill clt_test
 
 sleep 0.2
 StopDare
