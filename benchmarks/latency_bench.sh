@@ -67,7 +67,7 @@ StopDare() {
 
 DAREDIR=""
 OPCODE="put"
-server_count=3
+server_count=6
 
 for arg in "$@"
 do
@@ -97,7 +97,8 @@ if [[ "x$DAREDIR" == "x" ]]; then
 fi
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
-nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
+# nodes=(`cat $PBS_NODEFILE | tr ' ' '\n' | awk '!u[$0]++'`)
+nodes=(`cat $PBS_NODEFILE | tr ' ' '\n'`)
 node_count=${#nodes[@]}
 echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
@@ -135,7 +136,7 @@ echo "Starting $server_count servers..."
 StartDare $server_count
 echo "done!"
 
-sleep 5
+sleep 10
 
 #sleep 8  
 #note:this sleep statement here is cause of some problems;hence, comented out    

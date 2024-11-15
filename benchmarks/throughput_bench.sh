@@ -118,7 +118,7 @@ CreatrTraceForClients() {
 echo "start!"
 DAREDIR=""
 OPCODE="put"
-server_count=3
+server_count=12
 client_count=4
 blob_size=64
 proc=100
