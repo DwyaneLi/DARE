@@ -1289,8 +1289,9 @@ handle_message_from_server( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         {
             //dump_bytes(log_fp, ud_hdr, wc->byte_len - 40, "received bytes");
             /* CSM reply from server */
-            //info(log_fp, ">> Received CSM reply from server with lid%"
-            //    PRIu16"\n", wc->slid);
+            /* lxl add */
+            info(log_fp, ">> Received CSM reply from server with lid%"
+                PRIu16"\n", wc->slid);
             /* Handle reply */
             rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
             if (0 != rc) {
