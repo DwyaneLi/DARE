@@ -2179,6 +2179,11 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     return 0;
 }
 
+/* lxl add */
+void ud_update_lrid(uint16_t lid, uint64_t req_id, uint8_t type) {
+    return;
+}
+
 static int 
 handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
 {

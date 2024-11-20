@@ -489,6 +489,11 @@ int dare_ib_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
     return ud_send_clt_reply(lid, req_id, type);
 }
 
+/* lxl add */
+void dare_ib_update_lrid( uint16_t lid, uint64_t req_id, uint8_t type ) {
+    ud_update_lrid(lid, req_id, type);
+}
+
 #endif 
 
 /* ================================================================== */
