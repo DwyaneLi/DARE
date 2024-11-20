@@ -2197,8 +2197,8 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     }
     
     if (reply->data.len != 0) {
-        debug(log_fp, "Received data len %u: %.*s\n", 
-            reply->data.len, reply->data.data);
+        debug(log_fp, "Received data of %d len %u: %.*s\n", 
+            reply->hdr.id reply->data.len, reply->data.data);
     }
     
     return 0;
