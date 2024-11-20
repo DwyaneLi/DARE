@@ -10,7 +10,7 @@ FLAGS        = -std=gnu99 -I./include -I./utils/rbtree/include -I/usr/include
 CFLAGS       = -Wl,--no-as-needed -Wall -Wunused-function -Wextra
 LDFLAGS      = -L/usr/lib/x86_64-linux-gnu -libverbs -lm
 
-PREFIX  = /home/io500/dare
+PREFIX  = /home/raft/dare
 LIBPATH = $(PREFIX)/lib
 BINDIR = $(PREFIX)/bin
 

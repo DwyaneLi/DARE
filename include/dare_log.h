@@ -606,7 +606,7 @@ log_append_entry_new( dare_log_t* log,
     entry->replier = -1;
     if (type == CSM) {
         int i;
-        uint8_t size = get_extended_group_size(config);
+        uint8_t size = get_extended_group_size(*config);
         uint64_t max_index = 0;
         for(i = 0; i < size; i++) {
             // 这个server没有存活，不选择他
