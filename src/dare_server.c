@@ -2215,7 +2215,8 @@ log_pruning()
     the log of a server that recovers. Thus, property P3: the leader's 
     head offset remains constant during a server's recovery.
     */
-    
+    /* lxl add */
+    info(log_fp, "now prune log:\n");
     /* Find minimum remote apply offset */
     size = get_extended_group_size(data.config);
     uint64_t min_offset = data.log->apply;
@@ -2227,7 +2228,7 @@ log_pruning()
         if (log_is_offset_larger(data.log, min_offset, 
                     data.ctrl_data->apply_offsets[i]))
             min_offset = data.ctrl_data->apply_offsets[i];
-        //info(log_fp, "   # (p%"PRIu8"): apply=%"PRIu64"\n", i, data.ctrl_data->apply_offsets[i]);
+        info(log_fp, "   # (p%"PRIu8"): apply=%"PRIu64"\n", i, data.ctrl_data->apply_offsets[i]);
     }
     //info(log_fp, "   # min_offset = %"PRIu64"\n", min_offset);
     if (!log_offset_end_distance(data.log, min_offset)) {
