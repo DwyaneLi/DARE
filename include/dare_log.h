@@ -626,6 +626,8 @@ log_append_entry_new( dare_log_t* log,
         if(entry->replier == -1) {
             entry->replier == config->idx;
         }
+
+        info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
     }
     
     /* Add data of the new entry */
