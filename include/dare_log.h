@@ -610,6 +610,7 @@ log_append_entry_new( dare_log_t* log,
         uint64_t max_index = 0;
         for(i = 0; i < size; i++) {
             // 这个server没有存活，不选择他
+            info(log_fp, "apply[%d] = %d, entry->idx = %d, max_index = %d\n", i, apply_offsets[i], entry->idx, max_index);
             if (!CID_IS_SERVER_ON(config->cid, i)) {
                 info(log_fp, "lalala1\n");
                 continue;
