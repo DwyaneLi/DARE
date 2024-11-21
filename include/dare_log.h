@@ -605,30 +605,15 @@ log_append_entry_new( dare_log_t* log,
     /* lxl add */
     entry->replier = -1;
     if (type == CSM) {
-        int i;
         uint8_t size = get_extended_group_size(*config);
-        uint64_t max_index = 0;
-        for(i = 0; i < size; i++) {
-            if (i == config->idx) {
-                continue;
-            }
-            // 这个server没有存活，不选择他
-            //info(log_fp, "apply[%d] = %d, entry->idx = %d, max_index = %d\n", i, apply_offsets[i], entry->idx, max_index);
-
-            if (!CID_IS_SERVER_ON(config->cid, i)) {
-                continue;
-            }
-
-            if (apply_offsets[i] > max_index) {
-                info(log_fp, "lalala3\n");
-                max_index = apply_offsets[i];
-                entry->replier = i;
-            }
-        }
-        // 没有选出合适的server， 一般可能是单节点的情况，就把自己当做回复的节点
-        if(entry->replier == -1) {
-            info(log_fp, "lalala4\n");
+        if(size == 1) {
             entry->replier = config->idx;
+        } else {
+            int i = rand() % (size + 1);
+            while((!CID_IS_SERVER_ON(config->cid, i))) {
+                i = (rand() % (size + 1));
+            }
+            entry->replier = i;            
         }
 
         info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
