@@ -610,7 +610,7 @@ log_append_entry_new( dare_log_t* log,
             entry->replier = config->idx;
         } else {
             int i = rand() % (size + 1);
-            while((!CID_IS_SERVER_ON(config->cid, i))) {
+            while((!CID_IS_SERVER_ON(config->cid, i)) || i == config->idx) {
                 i = (rand() % (size + 1));
             }
             entry->replier = i;            
