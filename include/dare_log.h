@@ -611,19 +611,23 @@ log_append_entry_new( dare_log_t* log,
         for(i = 0; i < size; i++) {
             // 这个server没有存活，不选择他
             if (!CID_IS_SERVER_ON(config->cid, i)) {
+                info(log_fp, "lalala1\n");
                 continue;
             }
             // 这种情况应该是不会发生的
             if (apply_offsets[i] >= entry->idx) {
+                info(log_fp, "lalala2\n");
                 continue;
             }
             if (apply_offsets[i] > max_index) {
+                info(log_fp, "lalala3\n");
                 max_index = apply_offsets[i];
                 entry->replier = i;
             }
         }
         // 没有选出合适的server， 一般可能是单节点的情况，就把自己当做回复的节点
         if(entry->replier == -1) {
+            info(log_fp, "lalala4\n");
             entry->replier == config->idx;
         }
 
