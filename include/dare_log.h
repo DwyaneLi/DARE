@@ -609,14 +609,17 @@ log_append_entry_new( dare_log_t* log,
         uint8_t size = get_extended_group_size(*config);
         uint64_t max_index = 0;
         for(i = 0; i < size; i++) {
+            if (i == config->idx) {
+                continue;
+            }
             // 这个server没有存活，不选择他
             info(log_fp, "apply[%d] = %d, entry->idx = %d, max_index = %d\n", i, apply_offsets[i], entry->idx, max_index);
+
             if (!CID_IS_SERVER_ON(config->cid, i)) {
-                info(log_fp, "lalala1\n");
                 continue;
             }
             // 这种情况应该是不会发生的
-            if (apply_offsets[i] >= entry->idx) {
+            if (log_is_offset_larger(log, apply_offsets[i], entry->idx)) {
                 info(log_fp, "lalala2\n");
                 continue;
             }
