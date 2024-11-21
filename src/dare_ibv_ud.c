@@ -1134,7 +1134,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
               SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
               wc->slid, CSM, &request->cmd, 
-              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets));
+              &(SRV_DATA->config), SRV_DATA->ctrl_data->apply_offsets);
 #ifdef WRITE_BENCH   
     if (measure_count == 999) {
         info(log_fp, "Adding %"PRIu64" bytes to the log\n", 

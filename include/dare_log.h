@@ -628,7 +628,7 @@ log_append_entry_new( dare_log_t* log,
         // 没有选出合适的server， 一般可能是单节点的情况，就把自己当做回复的节点
         if(entry->replier == -1) {
             info(log_fp, "lalala4\n");
-            entry->replier == config->idx;
+            entry->replier = config->idx;
         }
 
         info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
