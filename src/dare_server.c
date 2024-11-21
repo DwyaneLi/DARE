@@ -2038,6 +2038,9 @@ apply_committed_entries()
             goto apply_next_entry;
         if (CSM == entry->type) {
             /* Client SM entry */
+            if (entry->req_id != 0) {
+                dare_ib_update_lrid(entry->clt_id, entry->req_id, CSM);
+            }
             if (entry->req_id != 0 && entry->replier == data.config.idx) { // lxl add
                 /* Send reply to the client */
                 rc = dare_ib_send_clt_reply(entry->clt_id, 

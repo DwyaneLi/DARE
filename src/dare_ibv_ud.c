@@ -2181,7 +2181,14 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 
 /* lxl add */
 void ud_update_lrid(uint16_t lid, uint64_t req_id, uint8_t type) {
-    return;
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
+    if(ep == NULL) {
+        ep = ep_insert(&SRV_DATA->endpoints, lid);
+        ep->last_req_id = 0;
+    }
+    ep->last_req_id = req_id;
+    ep->committed = 1;
+    return ;
 }
 
 static int 
