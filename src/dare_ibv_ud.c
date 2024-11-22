@@ -2130,6 +2130,13 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             // TODO: you should get the last_req_id from the protocol SM
             csm_reply->hdr.id = req_id;
             csm_reply->hdr.type = CSM_REPLY;
+
+            /* lxl add */
+            // set leader info for client
+            uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+            dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+            csm_reply->leader_lid = leader_ep->ud_ep.lid;
+            csm_reply->leader_qpn = leader_ep->ud_ep.qpn;
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
             //info(log_fp, "set reply %d\n", req_id);
