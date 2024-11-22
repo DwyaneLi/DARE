@@ -40,6 +40,8 @@ typedef struct client_req_t client_req_t;
 
 struct client_rep_t {
     ud_hdr_t hdr;
+    uint16_t leader_lid;
+    uint32_t leader_qpn;
     sm_data_t data;
 };
 typedef struct client_rep_t client_rep_t;

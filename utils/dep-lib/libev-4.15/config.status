@@ -437,11 +437,11 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/io500/DARE/utils/dep-lib/libev-4.15'
+ac_pwd='/home/raft/DARE/utils/dep-lib/libev-4.15'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/usr/bin/mkdir -p'
-AWK='gawk'
+AWK='mawk'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
 ac_need_defaults=:
@@ -675,7 +675,7 @@ finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
 finish_eval=''
 hardcode_into_libs='yes'
 sys_lib_search_path_spec='/usr/lib/gcc/x86_64-linux-gnu/9 /usr/lib/x86_64-linux-gnu /usr/lib /lib/x86_64-linux-gnu /lib '
-sys_lib_dlsearch_path_spec='/lib /usr/lib /usr/local/cuda-11.6/targets/x86_64-linux/lib /usr/lib/x86_64-linux-gnu/libfakeroot /usr/local/lib /usr/local/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /lib32 /usr/lib32 /libx32 /usr/libx32 '
+sys_lib_dlsearch_path_spec='/lib /usr/lib /usr/lib/x86_64-linux-gnu/libfakeroot /usr/local/lib /usr/local/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu '
 hardcode_action='immediate'
 enable_dlopen='unknown'
 enable_dlopen_self='unknown'
@@ -872,17 +872,17 @@ S["am__tar"]="$${TAR-tar} chof - \"$$tardir\""
 S["AMTAR"]="$${TAR-tar}"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
-S["AWK"]="gawk"
+S["AWK"]="mawk"
 S["mkdir_p"]="/usr/bin/mkdir -p"
 S["MKDIR_P"]="/usr/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/install-sh"
-S["MAKEINFO"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/missing --run automake-1.11"
-S["AUTOCONF"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /home/io500/DARE/utils/dep-lib/libev-4.15/missing --run aclocal-1.11"
+S["install_sh"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/install-sh"
+S["MAKEINFO"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/raft/DARE/utils/dep-lib/libev-4.15/missing --run aclocal-1.11"
 S["VERSION"]="4.15"
 S["PACKAGE"]="libev"
 S["CYGPATH_W"]="echo"

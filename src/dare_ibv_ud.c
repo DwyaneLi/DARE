@@ -96,6 +96,13 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc);
 static int 
 cmpfunc_uint64( const void *a, const void *b );
 
+/* lxl add */
+static int 
+handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply);
+
+static int
+set_ud_ep(ud_ep_t *ud_ep, uint16_t lid, uint32_t qpn);
+
 static int
 mcast_ah_create();
 //static void
@@ -1293,7 +1300,9 @@ handle_message_from_server( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
             info(log_fp, ">> Received CSM reply from server with lid%"
                 PRIu16"\n", wc->slid);
             /* Handle reply */
-            rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
+            /* lxl add */
+            // rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
+            rc = handle_csm_reply_new(wc, (client_rep_t*)ud_hdr);
             if (0 != rc) {
                 error(log_fp, "Cannot handle reply from server\n");
                 type = MSG_ERROR;
@@ -2084,6 +2093,14 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = request->hdr.id;
     reply->hdr.type = CSM_REPLY;
+
+    /* lxl add */
+    // set leader info for client
+    // 其实应该也不用改，因为这个版本只有leader会回复写请求
+    uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+    dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+    reply->leader_lid = leader_ep->ud_ep.lid;
+    reply->leader_qpn = leader_ep->ud_ep.qpn;
     
     /* Get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, &request->cmd, &reply->data);
@@ -2137,6 +2154,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
             csm_reply->leader_lid = leader_ep->ud_ep.lid;
             csm_reply->leader_qpn = leader_ep->ud_ep.qpn;
+
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
             //info(log_fp, "set reply %d\n", req_id);
@@ -2216,6 +2234,35 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
         wc_to_ud_ep(ud_ep, wc);
         //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
         info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+    }
+    
+    if (reply->data.len != 0) {
+        debug(log_fp, "Received data of %d len %u: %.*s\n", 
+            reply->hdr.id reply->data.len, reply->data.data);
+    }
+    
+    return 0;
+}
+
+/* lxl add */
+static int 
+handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
+    //info(log_fp, "Received the reply of request%d\n", reply->hdr.id);
+    if (reply->hdr.id < IBDEV->request_id) {
+        /* Old reply; ignore */
+        return 0;
+    }
+    
+    ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
+    info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+    if (ud_ep->lid != reply->leader_lid) {
+        /* New leader: set the UD endpoint data */
+        /* lxl add */
+        //info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        // info(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        set_ud_ep(ud_ep, reply->leader_lid, reply->leader_qpn);
+        //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+        info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
     }
     
     if (reply->data.len != 0) {
@@ -2517,4 +2564,20 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
     }
     ud_ep->qpn = wc->src_qp;
     return 0;
+}
+
+/* lxl add */
+static int
+set_ud_ep(ud_ep_t *ud_ep, uint16_t lid, uint32_t qpn) {
+    ud_ep->lid = lid;
+    if (NULL != ud_ep->ah) {
+        ud_ah_destroy(ud_ep->ah);
+    }
+    ud_ep->ah = ud_ah_create(ud_ep->lid);
+    if (NULL == ud_ep->ah) {
+        error_return(1, log_fp, "Cannot create AH for LID %"PRIu16"\n", 
+                     ud_ep->lid);
+    }
+    ud_ep->qpn = qpn;
+    return 0;    
 }
