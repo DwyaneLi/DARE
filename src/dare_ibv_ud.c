@@ -2096,7 +2096,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
 
     /* lxl add */
     // set leader info for client
-    // 其实应该也不用改，因为这个版本只有leader会回复写请求
+    // 其实应该也不用改，因为这个版本只有leader会回复读请求
     uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
     dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
     reply->leader_lid = leader_ep->ud_ep.lid;
@@ -2237,8 +2237,9 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     }
     
     if (reply->data.len != 0) {
+        // lxl add
         debug(log_fp, "Received data of %d len %u: %.*s\n", 
-            reply->hdr.id reply->data.len, reply->data.data);
+            reply->hdr.id, reply->data.len, reply->data.data);
     }
     
     return 0;
@@ -2254,7 +2255,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
     }
     
     ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
-    info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+    info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
     if (ud_ep->lid != reply->leader_lid) {
         /* New leader: set the UD endpoint data */
         /* lxl add */
@@ -2267,7 +2268,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
     
     if (reply->data.len != 0) {
         debug(log_fp, "Received data of %d len %u: %.*s\n", 
-            reply->hdr.id reply->data.len, reply->data.data);
+            reply->hdr.id, reply->data.len, reply->data.data);
     }
     
     return 0;
