@@ -2151,9 +2151,17 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             /* lxl add */
             // set leader info for client
             uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
-            dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
-            csm_reply->leader_lid = leader_ep->ud_ep.lid;
-            csm_reply->leader_qpn = leader_ep->ud_ep.qpn;
+            // 如果自己是leader，就设成自己的lid和qpn
+            if(leader == SRV_DATA->config.idx) {
+                info(log_fp, "i am leader, now fill reply leader_ep\n");
+                csm_reply->leader_lid = IBDEV->lid;
+                csm_reply->leader_qpn = IBDEV->ud_qp->qp_num;
+
+            } else {
+                dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+                csm_reply->leader_lid = leader_ep->ud_ep.lid;
+                csm_reply->leader_qpn = leader_ep->ud_ep.qpn;                
+            }
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
