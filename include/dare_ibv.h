@@ -195,6 +195,7 @@ int dare_ib_resend_clt_request();
 int dare_ib_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type );
 /* lxl add */
 void dare_ib_update_lrid( uint16_t lid, uint64_t req_id, uint8_t type );
+int dare_ib_trans_clt_reply( int16_t lid, uint64_t req_id, uint8_t type, uint32_t qpn );
 
 /* Handle QPs state */
 void dare_ib_disconnect_server( uint8_t idx );

@@ -39,6 +39,7 @@ struct dare_log_entry_t {
 
     /* lxl add */
     int16_t replier; /* LID of replier*/
+    uint32_t clt_qpn; /* ud qpn of client */
 
     //uint8_t  pad[5];
     union {
@@ -569,7 +570,8 @@ log_append_entry_new( dare_log_t* log,
                     uint8_t  type,
                     void *data,
                     server_config_t *config,
-                    uint64_t *apply_offsets)
+                    uint64_t *apply_offsets,
+                    uint32_t clt_qpn)
 {
     sm_cmd_t *cmd = (sm_cmd_t*)data;
     dare_cid_t *cid = (dare_cid_t*)data;
@@ -618,6 +620,7 @@ log_append_entry_new( dare_log_t* log,
 
         info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
     }
+    entry->clt_qpn = clt_qpn;
     
     /* Add data of the new entry */
     switch(type) {

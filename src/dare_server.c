@@ -2024,7 +2024,8 @@ apply_committed_entries()
                 // 是自己的消息才回复
                 if (entry->req_id != 0 && entry->replier == data.config.idx) {
                     info(log_fp, "reply request id :%d\n", entry->req_id);
-                    rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                    // rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                    rc = dare_ib_trans_clt_reply(entry->clt_id, entry->req_id, CSM, entry->clt_qpn);
                     if (0 != rc) {
                         error(log_fp, "im follower, Cannot send client reply\n");
                     }

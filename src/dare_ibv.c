@@ -494,6 +494,11 @@ void dare_ib_update_lrid( uint16_t lid, uint64_t req_id, uint8_t type ) {
     ud_update_lrid(lid, req_id, type);
 }
 
+int dare_ib_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qpn )
+{
+    return ud_trans_clt_reply(lid, req_id, type, qpn);
+}
+
 #endif 
 
 /* ================================================================== */
