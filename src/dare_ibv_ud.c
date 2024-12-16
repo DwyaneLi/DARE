@@ -1000,7 +1000,22 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = request->hdr.id;
     reply->hdr.type = CSM_REPLY;
-    
+
+    /* lxl add */
+    // set leader info for client
+    // 其实应该也不用改，因为这个版本只有leader会回复读请求
+    uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+    // 如果自己是leader，就设成自己的lid和qpn
+    if(leader == SRV_DATA->config.idx) {
+        info(log_fp, "i am leader, now fill reply leader_ep, read\n");
+        reply->leader_lid = IBDEV->lid;
+        reply->leader_qpn = IBDEV->ud_qp->qp_num;
+    } else {
+        dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+        reply->leader_lid = leader_ep->ud_ep.lid;
+        reply->leader_qpn = leader_ep->ud_ep.qpn;                
+    }     
+       
     /* Get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, &request->cmd, &reply->data);
     if (0 != rc) {
@@ -2100,7 +2115,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
     uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
     // 如果自己是leader，就设成自己的lid和qpn
     if(leader == SRV_DATA->config.idx) {
-        info(log_fp, "i am leader, now fill reply leader_ep\n");
+        info(log_fp, "i am leader, now fill reply leader_ep, read\n");
         reply->leader_lid = IBDEV->lid;
         reply->leader_qpn = IBDEV->ud_qp->qp_num;
     } else {
@@ -2108,7 +2123,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
         reply->leader_lid = leader_ep->ud_ep.lid;
         reply->leader_qpn = leader_ep->ud_ep.qpn;                
     }    
-    
+
     /* Get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, &request->cmd, &reply->data);
     if (0 != rc) {
