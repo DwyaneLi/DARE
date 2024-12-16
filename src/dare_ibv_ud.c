@@ -1007,7 +1007,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
     uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
     // 如果自己是leader，就设成自己的lid和qpn
     if(leader == SRV_DATA->config.idx) {
-        info(log_fp, "i am leader, now fill reply leader_ep, read\n");
+        // info(log_fp, "i am leader, now fill reply leader_ep, read\n");
         reply->leader_lid = IBDEV->lid;
         reply->leader_qpn = IBDEV->ud_qp->qp_num;
     } else {
@@ -1015,7 +1015,7 @@ handle_one_csm_read_request( struct ibv_wc *wc, client_req_t *request )
         reply->leader_lid = leader_ep->ud_ep.lid;
         reply->leader_qpn = leader_ep->ud_ep.qpn;                
     }     
-       
+
     /* Get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, &request->cmd, &reply->data);
     if (0 != rc) {
@@ -1312,8 +1312,8 @@ handle_message_from_server( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
             //dump_bytes(log_fp, ud_hdr, wc->byte_len - 40, "received bytes");
             /* CSM reply from server */
             /* lxl add */
-            info(log_fp, ">> Received CSM reply from server with lid%"
-                PRIu16"\n", wc->slid);
+            //info(log_fp, ">> Received CSM reply from server with lid%"
+            //    PRIu16"\n", wc->slid);
             /* Handle reply */
             /* lxl add */
             // rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
@@ -2115,7 +2115,7 @@ void ud_clt_answer_read_request(dare_ep_t *ep)
     uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
     // 如果自己是leader，就设成自己的lid和qpn
     if(leader == SRV_DATA->config.idx) {
-        info(log_fp, "i am leader, now fill reply leader_ep, read\n");
+        //info(log_fp, "i am leader, now fill reply leader_ep, read\n");
         reply->leader_lid = IBDEV->lid;
         reply->leader_qpn = IBDEV->ud_qp->qp_num;
     } else {
@@ -2175,7 +2175,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
             // 如果自己是leader，就设成自己的lid和qpn
             if(leader == SRV_DATA->config.idx) {
-                info(log_fp, "i am leader, now fill reply leader_ep\n");
+               //info(log_fp, "i am leader, now fill reply leader_ep\n");
                 csm_reply->leader_lid = IBDEV->lid;
                 csm_reply->leader_qpn = IBDEV->ud_qp->qp_num;
 
@@ -2284,7 +2284,7 @@ int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qp
             uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
             // 如果自己是leader，就设成自己的lid和qpn
             if(leader == SRV_DATA->config.idx) {
-                info(log_fp, "i am leader, now fill reply leader_ep\n");
+                //info(log_fp, "i am leader, now fill reply leader_ep\n");
                 csm_reply->leader_lid = IBDEV->lid;
                 csm_reply->leader_qpn = IBDEV->ud_qp->qp_num;
             } else {
@@ -2389,7 +2389,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
         // info(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         set_ud_ep(ud_ep, reply->leader_lid, reply->leader_qpn);
         //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
-        info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
+        //info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
     }
     
     if (reply->data.len != 0) {
