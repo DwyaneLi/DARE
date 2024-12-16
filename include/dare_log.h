@@ -611,9 +611,9 @@ log_append_entry_new( dare_log_t* log,
         if(size == 1) {
             entry->replier = config->idx;
         } else {
-            int i = rand() % (size + 1);
+            int i = rand() % size;
             while((!CID_IS_SERVER_ON(config->cid, i)) || i == config->idx) {
-                i = (rand() % (size + 1));
+                i = (rand() % size);
             }
             entry->replier = i;            
         }
