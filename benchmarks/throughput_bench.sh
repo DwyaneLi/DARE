@@ -118,9 +118,9 @@ CreatrTraceForClients() {
 echo "start!"
 DAREDIR=""
 OPCODE="put"
-server_count=3
-client_count=4
-blob_size=64
+server_count=5
+client_count=2
+blob_size=128
 proc=100
 for arg in "$@"
 do
