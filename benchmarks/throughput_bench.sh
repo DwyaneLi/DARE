@@ -118,8 +118,8 @@ CreatrTraceForClients() {
 echo "start!"
 DAREDIR=""
 OPCODE="put"
-server_count=5
-client_count=2
+server_count=3
+client_count=4
 blob_size=128
 proc=100
 for arg in "$@"
@@ -214,7 +214,7 @@ echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
 
-sleep 10
+sleep 15
 
 # Write entry in the SM
 tmp_tfile="$PWD/tmp.trace"
