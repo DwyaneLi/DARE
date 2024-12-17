@@ -74,17 +74,16 @@ StartClients() {
     #cmd=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
     #echo "Executing: ${cmd[@]}"
     #${cmd[@]}
-    lxl=0
+
     for i in "${!clients[@]}"; do
         # Start client
         if [[ "x${proc}" == "x" ]]; then
             data_files[$i]="$PWD/data/loop_req_${OPCODE}_${blob_size}b_c${i}.data"
-            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}${lxl}" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID")
+            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID")
         else 
             data_files[$i]="$PWD/data/loop_req_${OPCODE}_p${proc}_${blob_size}b_c${i}.data"
-            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}${lxl}" "-p $proc" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID" )
+            run_loop=( "${DAREDIR}/bin/clt_test" "--loop" "-t ${trace_file}" "-p $proc" "-o ${data_files[$i]}" "-l $PWD/clt${i}.log" "-m $DGID" )
         fi
-        lxl=$(($lxl+1))
         cmd=( "ssh" "$USER@${clients[$i]}" "nohup" "${run_loop[@]}" "${redirection[@]}" "&" "echo \$!" )
         cpids[${clients[$i]}]=$("${cmd[@]}")
         echo "COMMDAND: ${cmd[@]}"
@@ -104,25 +103,23 @@ StopClients() {
 }
 
 CreatrTraceForClients() {
-    lxl=0
     echo "create trace for clients"
     for i in "${clients[@]}"; do
-        create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file$lxl" )
-        cmd=("ssh" "$USER@$i" "rm -rf $trace_file$i")
+        create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
+        cmd=("ssh" "$USER@$i" "rm -rf $trace_file")
         echo "Executing: ${cmd[@]}"
         ${cmd[@]}
         cmd=("ssh" "$USER@$i" "${create_trace[@]}")
         echo "Executing: ${cmd[@]}"
         ${cmd[@]}
-        lxl=$(($lxl+1))
     done    
 }
 
 echo "start!"
 DAREDIR=""
 OPCODE="put"
-server_count=3
-client_count=3
+server_count=6
+client_count=4
 blob_size=64
 proc=100
 for arg in "$@"
@@ -197,7 +194,7 @@ if [ "x$OPCODE" != "xput" -a "x$OPCODE" != "xget" ]; then
     ErrorAndExit "Wrong operation type: --op."
 fi
 rm -f *.log
-mkdir -p data
+# mkdir -p data
 trace_file="$PWD/data/loop_req_${OPCODE}_${blob_size}b.trace"
 
 # Handle SIGINT to ensure a clean exit
@@ -217,7 +214,7 @@ echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
 
-sleep 5
+sleep 10
 
 # Write entry in the SM
 tmp_tfile="$PWD/tmp.trace"
@@ -239,5 +236,3 @@ sleep 0.2
 StopDare
 
 ########################################################################
-
-
