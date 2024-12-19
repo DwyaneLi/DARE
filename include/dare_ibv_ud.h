@@ -40,6 +40,9 @@ typedef struct client_req_t client_req_t;
 
 struct client_rep_t {
     ud_hdr_t hdr;
+    // lxl_add
+    uint16_t leader_lid;
+    uint32_t leader_qpn;
     sm_data_t data;
 };
 typedef struct client_rep_t client_rep_t;
@@ -105,8 +108,12 @@ int ud_create_clt_downsize_request();
 int ud_resend_clt_request();
 int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type );
 void ud_clt_answer_read_request(dare_ep_t *ep);
+
 /* lxl add */
 int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd);
+void ud_update_lrid( uint16_t lid, uint64_t req_id, uint8_t type );
+int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qpn );
+int ud_trans_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd, uint32_t qpn);
 
 /* LogGP */
 double ud_loggp_prtt( int n, double delay, uint32_t size, int inline_flag );

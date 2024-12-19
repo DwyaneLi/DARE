@@ -2127,21 +2127,49 @@ apply_entry:
             /* lxl add */
             if(CSM_READ == entry->csm_type) {
                 // 是自己回复的才进行应用状态机和回复，不然没必要直接跳过去就可以了
-                if(entry->req_id != 0 && entry->replier == data.config.idx) {
-                    rc = ud_clt_reply_read_request(entry->clt_id, entry->req_id, &(entry->data.cmd));
-                    if(0 != rc) {
-                        error(log_fp, "Cannot apply and reply read entry");
+                if(IS_LEADER) {
+                    if(entry->req_id != 0) {
+                        dare_ib_update_lrid(entry->clt_id, entry->req_id, CSM);  
+                    }
+                    if(entry->req_id != 0 && entry->replier == data.config.idx) {
+                        rc = ud_clt_reply_read_request(entry->clt_id, entry->req_id, &(entry->data.cmd));
+                        if(0 != rc) {
+                            error(log_fp, "Cannot apply and reply read entry");
+                        }
+                    }                    
+                } else {
+                    if (entry->req_id != 0 && entry->replier == data.config.idx) {
+                        rc = ud_trans_clt_reply_read_request(entry->clt_id, entry->req_id, &(entry->data.cmd), entry->clt_qpn);
+                        if(0 != rc) {
+                            error(log_fp, "Cannot apply and reply read entry");
+                        }
                     }
                 }
-                
+
             } else if(CSM_WRITE == entry->csm_type) {
+                if(IS_LEADER) {
+                    if(entry->req_id != 0) {
+                        dare_ib_update_lrid(entry->clt_id, entry->req_id, CSM);  
+                    }
+                    if(entry->req_id != 0 && entry->replier == data.config.idx) {
+                        rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                        if (0 != rc) {
+                            error(log_fp, "Cannot send client reply\n");
+                        }
+                    }
+                } else {
+                    if (entry->req_id != 0 && entry->replier == data.config.idx) {
+                        // info(log_fp, "reply request id :%d\n", entry->req_id);
+                        // rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
+                        rc = dare_ib_trans_clt_reply(entry->clt_id, entry->req_id, CSM, entry->clt_qpn);
+                        if (0 != rc) {
+                            error(log_fp, "im follower, Cannot send client reply\n");
+                        }
+                    }                    
+                }
                 rc = data.sm->apply_cmd(data.sm, &entry->data.cmd, NULL);
                 if (0 != rc) {
                     error(log_fp, "Cannot apply entry\n");
-                }
-                /* reply client */
-                if(entry->req_id != 0 && entry->replier == data.config.idx) {
-                    rc = dare_ib_send_clt_reply(entry->clt_id, entry->req_id, CSM);
                 }
             }
             last_applied_entry.idx = entry->idx;

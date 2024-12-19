@@ -44,6 +44,7 @@ struct dare_log_entry_t {
     /* lxl add */
     uint8_t csm_type; /* read is 1, write is 2 */
     int16_t replier; /* LID of replier*/
+    uint32_t clt_qpn; /* ud qpn of client */
 
     //uint8_t  pad[5];
     union {
@@ -575,7 +576,8 @@ log_append_entry_new( dare_log_t* log,
                     void *data,
                     server_config_t *config,
                     uint64_t *apply_offsets,
-                    uint8_t csm_type)
+                    uint8_t csm_type,
+                    uint32_t clt_qpn)
 {
     sm_cmd_t *cmd = (sm_cmd_t*)data;
     dare_cid_t *cid = (dare_cid_t*)data;
@@ -611,28 +613,20 @@ log_append_entry_new( dare_log_t* log,
     /* lxl add */
     entry->replier = -1;
     if (type == CSM) {
-        int i;
-        uint8_t size = get_extended_group_size(config);
-        uint64_t max_index = 0;
-        for(i = 0; i < size; i++) {
-            // 这个server没有存活，不选择他
-            if (!CID_IS_SERVER_ON(config->cid, i)) {
-                continue;
+        uint8_t size = get_extended_group_size(*config);
+        if(size == 1) {
+            entry->replier = config->idx;
+        } else {
+            int i = rand() % size;
+            while((!CID_IS_SERVER_ON(config->cid, i)) || i == config->idx) {
+                i = (rand() % size);
             }
-            // 这种情况应该是不会发生的
-            if (apply_offsets[i] >= entry->idx) {
-                continue;
-            }
-            if (apply_offsets[i] > max_index) {
-                max_index = apply_offsets[i];
-                entry->replier = i;
-            }
+            entry->replier = i;            
         }
-        // 没有选出合适的server， 一般可能是单节点的情况，就把自己当做回复的节点
-        if(entry->replier == -1) {
-            entry->replier == config->idx;
-        }
+
+        //info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
     }
+    entry->clt_qpn = clt_qpn;
     
     /* Add data of the new entry */
     switch(type) {

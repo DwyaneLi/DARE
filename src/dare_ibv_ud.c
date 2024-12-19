@@ -103,6 +103,10 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc);
 static int 
 cmpfunc_uint64( const void *a, const void *b );
 
+/* lxl add */
+static int 
+handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply);
+
 static int
 mcast_ah_create();
 //static void
@@ -1171,6 +1175,10 @@ handle_one_csm_read_request_new( struct ibv_wc *wc, client_req_t *request ) {
             return;            
         }
         // TODO: 对已经回复过的进行再一次回复，按照状态机目前的情况进行查询
+        rc = ud_clt_reply_read_request(wc->slid, request->hdr.id, &(request->cmd));
+        if(0 != rc) {
+            error(log_fp, "Cannot send read client reply\n");
+        }
         return;
     }
 
@@ -1181,7 +1189,7 @@ handle_one_csm_read_request_new( struct ibv_wc *wc, client_req_t *request ) {
     SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
               SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
               wc->slid, CSM, &request->cmd, 
-              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_READ);
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_READ, wc->src_qp);
 }
 
 static uint8_t
@@ -1296,7 +1304,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     SRV_DATA->last_write_csm_idx = log_append_entry_new(SRV_DATA->log,
               SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->hdr.id,
               wc->slid, CSM, &request->cmd, 
-              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_WRITE);
+              &(SRV_DATA->config), &(SRV_DATA->ctrl_data->apply_offsets), CSM_WRITE, wc->src_qp);
 #ifdef WRITE_BENCH   
     if (measure_count == 999) {
         info(log_fp, "Adding %"PRIu64" bytes to the log\n", 
@@ -1390,7 +1398,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
             text_wtime(log_fp, "CLIENT READ REQUEST %"PRIu64" (lid%"PRIu16")\n", 
                         ud_hdr->id, wc->slid);
             /* Handle request */
-            handle_one_csm_read_request(wc, (client_req_t*)ud_hdr);
+            // handle_one_csm_read_request(wc, (client_req_t*)ud_hdr);
+            handle_one_csm_read_request_new(wc, (client_req_t*)ud_hdr);
             break;
         }
         case CSM_WRITE:
@@ -1454,7 +1463,8 @@ handle_message_from_server( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
             //info(log_fp, ">> Received CSM reply from server with lid%"
             //    PRIu16"\n", wc->slid);
             /* Handle reply */
-            rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
+            //rc = handle_csm_reply(wc, (client_rep_t*)ud_hdr);
+            rc = handle_csm_reply_new(wc, (client_rep_t*)ud_hdr);
             if (0 != rc) {
                 error(log_fp, "Cannot handle reply from server\n");
                 type = MSG_ERROR;
@@ -2291,6 +2301,130 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
             // TODO: you should get the last_req_id from the protocol SM
             csm_reply->hdr.id = req_id;
             csm_reply->hdr.type = CSM_REPLY;
+
+            /* lxl add */
+            // set leader info for client
+            uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+            // 如果自己是leader，就设成自己的lid和qpn
+            if(leader == SRV_DATA->config.idx) {
+               //info(log_fp, "i am leader, now fill reply leader_ep\n");
+                csm_reply->leader_lid = IBDEV->lid;
+                csm_reply->leader_qpn = IBDEV->ud_qp->qp_num;
+
+            } else {
+                dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+                csm_reply->leader_lid = leader_ep->ud_ep.lid;
+                csm_reply->leader_qpn = leader_ep->ud_ep.qpn;                
+            }
+
+            csm_reply->data.len = 0;
+            len = sizeof(client_rep_t);
+            //info(log_fp, "set reply %d\n", req_id);
+#ifdef WRITE_BENCH            
+            //HRT_GET_TIMESTAMP(SRV_DATA->t2);
+            HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
+            measure_count++;
+            if (measure_count == 1000) {
+                qsort(ticks, measure_count, sizeof(uint64_t), cmpfunc_uint64);
+                info(log_fp, "Write request time: %lf (%lf, %lf)\n", 
+                    HRT_GET_USEC(ticks[measure_count/2]), HRT_GET_USEC(ticks[19]), 
+                    HRT_GET_USEC(ticks[measure_count-21]));
+                info(log_fp, "Sent %"PRIu32" bytes\n", len);
+                measure_count = 0;
+            }
+#endif             
+            break;
+        case CONFIG:
+            /* Reply to a reconfiguration request */
+            psm_reply = (reconf_rep_t*)IBDEV->ud_send_buf;
+            memset(psm_reply, 0, sizeof(reconf_rep_t));
+            psm_reply->hdr.id = req_id;
+            psm_reply->hdr.type = CFG_REPLY;
+            psm_reply->cid = SRV_DATA->config.cid;
+            psm_reply->cid_idx = ep->cid_idx;
+            psm_reply->head = SRV_DATA->log->head;
+            uint8_t size = get_extended_group_size(SRV_DATA->config);
+            for (i = 0; i < size; i++) {
+                ib_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[i].ep;
+                if (NULL == ib_ep) continue;
+                if (ib_ep->ud_ep.lid == lid) break;
+            }
+            psm_reply->idx = i;
+            len = sizeof(reconf_rep_t);
+            break;
+    }
+    /* Send reply */
+    rc = ud_send_message(&ep->ud_ep, len);
+    if (0 != rc) {
+        error_return(1, log_fp, "Cannot send message over UD to %"PRIu16"\n", 
+                     lid);
+    }
+#ifdef WRITE_BENCH            
+   // HRT_GET_TIMESTAMP(SRV_DATA->t1);
+#endif
+    
+    return 0;
+}
+
+/* lxl add */
+void ud_update_lrid(uint16_t lid, uint64_t req_id, uint8_t type) {
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
+    if(ep == NULL) {
+        ep = ep_insert(&SRV_DATA->endpoints, lid);
+        ep->last_req_id = 0;
+    }
+    ep->last_req_id = req_id;
+    ep->committed = 1;
+    return ;
+}
+
+/* lxl add */
+int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qpn )
+{
+    int rc;
+    dare_ib_ep_t *ib_ep;
+    
+    client_rep_t *csm_reply;
+    reconf_rep_t *psm_reply;
+    uint32_t len;
+    uint8_t i;
+    
+    /* Find the ep that send this request */
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
+    if (ep == NULL) {
+        /* No ep with this LID; create a new one */
+        ep = ep_insert(&SRV_DATA->endpoints, lid);
+        ep->last_req_id = 0;
+    }
+    // TODO: you should get the last_req_id from the protocol SM
+    ep->last_req_id = req_id;
+    ep->committed = 1;
+    ep->ud_ep.qpn = qpn;
+    
+    /* Create reply */
+    switch(type) {
+        case CSM:
+            /* Reply to a ClientSM request */
+            csm_reply = (client_rep_t*)IBDEV->ud_send_buf;
+            memset(csm_reply, 0, sizeof(client_rep_t));
+            // TODO: you should get the last_req_id from the protocol SM
+            csm_reply->hdr.id = req_id;
+            csm_reply->hdr.type = CSM_REPLY;
+
+            /* lxl add */
+            // set leader info for client
+            uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+            // 如果自己是leader，就设成自己的lid和qpn
+            if(leader == SRV_DATA->config.idx) {
+                //info(log_fp, "i am leader, now fill reply leader_ep\n");
+                csm_reply->leader_lid = IBDEV->lid;
+                csm_reply->leader_qpn = IBDEV->ud_qp->qp_num;
+            } else {
+                dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+                csm_reply->leader_lid = leader_ep->ud_ep.lid;
+                csm_reply->leader_qpn = leader_ep->ud_ep.qpn;                
+            }
+
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
             //info(log_fp, "set reply %d\n", req_id);
@@ -2360,6 +2494,35 @@ handle_csm_reply(struct ibv_wc *wc, client_rep_t *reply)
     if (reply->data.len != 0) {
         debug(log_fp, "Received data len %u: %.*s\n", 
             reply->data.len, reply->data.data);
+    }
+    
+    return 0;
+}
+
+/* lxl add */
+static int 
+handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
+    //info(log_fp, "Received the reply of request%d\n", reply->hdr.id);
+    if (reply->hdr.id < IBDEV->request_id) {
+        /* Old reply; ignore */
+        return 0;
+    }
+    
+    ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
+    //info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
+    if (ud_ep->lid != reply->leader_lid) {
+        /* New leader: set the UD endpoint data */
+        /* lxl add */
+        //info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        // info(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
+        set_ud_ep(ud_ep, reply->leader_lid, reply->leader_qpn);
+        //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+        //info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
+    }
+    
+    if (reply->data.len != 0) {
+        debug(log_fp, "Received data of %d len %u: %.*s\n", 
+            reply->hdr.id, reply->data.len, reply->data.data);
     }
     
     return 0;
@@ -2660,7 +2823,7 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
 
 /* lxl add */
 int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
-    int rc
+    int rc;
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
     if (ep == NULL) {
         /* No ep with this LID; create a new one */
@@ -2677,6 +2840,21 @@ int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     reply->hdr.id = req_id;
     reply->hdr.type = CSM_REPLY;
 
+    /* lxl add */
+    // set leader info for client
+    uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+    // 如果自己是leader，就设成自己的lid和qpn
+    if(leader == SRV_DATA->config.idx) {
+        //info(log_fp, "i am leader, now fill reply leader_ep\n");
+        reply->leader_lid = IBDEV->lid;
+        reply->leader_qpn = IBDEV->ud_qp->qp_num;
+
+    } else {
+        dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+        reply->leader_lid = leader_ep->ud_ep.lid;
+        reply->leader_qpn = leader_ep->ud_ep.qpn;                
+    }
+
     /* get data from SM */
     rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, cmd, &reply->data);
     if (0 != rc) {
@@ -2692,4 +2870,55 @@ int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     }        
 
     return 0;
+}
+
+int ud_trans_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd, uint32_t qpn) {
+    int rc;
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, lid);
+    if (ep == NULL) {
+        /* No ep with this LID; create a new one */
+        ep = ep_insert(&SRV_DATA->endpoints, lid);
+        ep->last_req_id = 0;
+    }
+    // TODO: you should get the last_req_id from the protocol SM
+    ep->last_req_id = req_id;
+    ep->committed = 1;
+    ep->ud_ep.qpn = qpn; 
+
+    /* create reply */
+    client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
+    memset(reply, 0, sizeof(client_rep_t));
+    reply->hdr.id = req_id;
+    reply->hdr.type = CSM_REPLY;
+
+    /* lxl add */
+    // set leader info for client
+    uint8_t leader = SID_GET_IDX(SRV_DATA->ctrl_data->sid);
+    // 如果自己是leader，就设成自己的lid和qpn
+    if(leader == SRV_DATA->config.idx) {
+        //info(log_fp, "i am leader, now fill reply leader_ep\n");
+        reply->leader_lid = IBDEV->lid;
+        reply->leader_qpn = IBDEV->ud_qp->qp_num;
+
+    } else {
+        dare_ib_ep_t *leader_ep = (dare_ib_ep_t*)SRV_DATA->config.servers[leader].ep;
+        reply->leader_lid = leader_ep->ud_ep.lid;
+        reply->leader_qpn = leader_ep->ud_ep.qpn;                
+    }
+
+    /* get data from SM */
+    rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, cmd, &reply->data);
+    if (0 != rc) {
+        error_return(1, log_fp, "Cannot apply read operation to the state machine\n");
+    }
+
+    /* send reply */
+    uint32_t len = sizeof(client_rep_t) + reply->data.len;
+    rc = ud_send_message(&ep->ud_ep, len);
+    if (0 != rc) {
+        error_return(1, log_fp, "Cannot send message over UD to %"PRIu16"\n", 
+                     ep->ud_ep.lid);
+    }        
+
+    return 0;    
 }
