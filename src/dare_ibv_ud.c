@@ -1282,6 +1282,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
+            info(log_fp, "last_req_id is %d, request->hdr.id is %d\n",ep->last_req_id, request->hdr.id);
             info(log_fp, "   # CMD not yet committed1\n");
             print_rc_info();
             return;
@@ -2519,7 +2520,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
         //info_wtime(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         // info(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         set_ud_ep(ud_ep, reply->leader_lid, reply->leader_qpn);
-        //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
+        info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
         //info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
     }
     
