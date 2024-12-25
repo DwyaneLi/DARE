@@ -1992,7 +1992,7 @@ apply_committed_entries()
 {
     int rc;
     int once = 0;
-    info(log_fp, "now start apply\n");
+    //info(log_fp, "now start apply\n");
     uint64_t old_apply = data.log->apply;
     dare_log_entry_t *entry;
     while (log_is_offset_larger(data.log, 
