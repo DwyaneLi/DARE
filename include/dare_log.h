@@ -625,6 +625,8 @@ log_append_entry_new( dare_log_t* log,
         }
 
         info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
+        /* lxl add */
+        entry->csm_type = csm_type;  
     }
     entry->clt_qpn = clt_qpn;
     
@@ -648,8 +650,6 @@ log_append_entry_new( dare_log_t* log,
                 entry->clt_id       = clt_id;
                 entry->type         = type;
                 entry->data.cmd.len = cmd->len;
-                /* lxl add */
-                entry->csm_type = csm_type;
             }
             /* Copy the command */
             if (cmd->len) {

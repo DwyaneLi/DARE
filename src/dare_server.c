@@ -2115,8 +2115,8 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
-        info(log_fp, "apply csm entry, req_id is %d, replier is %d, entry type is %d, entry csm_type is %d\n", entry->req_id, entry->replier, entry->type, entry->csm_type);
         if (CSM == entry->type) {
+            info(log_fp, "apply csm entry, req_id is %d, replier is %d, entry type is %d, entry csm_type is %d\n", entry->req_id, entry->replier, entry->type, entry->csm_type);
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
