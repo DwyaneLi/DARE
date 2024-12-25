@@ -1173,7 +1173,7 @@ handle_one_csm_read_request_new( struct ibv_wc *wc, client_req_t *request ) {
 
     if(ep->last_req_id >= request->hdr.id) {
         if(!ep->committed) {
-            info(log_fp, "   # CMD not yet committed\n");
+            info(log_fp, "   # CMD not yet committed2\n");
             print_rc_info();
             return;            
         }
@@ -1282,7 +1282,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
-            info(log_fp, "   # CMD not yet committed\n");
+            info(log_fp, "   # CMD not yet committed1\n");
             print_rc_info();
             return;
         }
@@ -2322,7 +2322,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            //info(log_fp, "set reply %d\n", req_id);
+            info(log_fp, "set reply %d\n", req_id);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
@@ -2854,6 +2854,7 @@ int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     ep->committed = 1;
 
     /* create reply */
+    info(log_fp, "set read reply %d\n", req_id);
     client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = req_id;
@@ -2905,6 +2906,7 @@ int ud_trans_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd
     ep->ud_ep.qpn = qpn; 
 
     /* create reply */
+    info(log_fp, "set read reply %d\n", req_id);
     client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = req_id;
