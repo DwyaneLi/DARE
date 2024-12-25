@@ -1243,7 +1243,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #ifdef HISTO_BATCHING
     static int clt_count = 0;
 #endif    
-    
+    info(log_fp, "this request->hdr.id is %d\n",request->hdr.id);
     /* Find the endpoint that send this request */
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, wc->slid);
     if (ep ==  NULL) {

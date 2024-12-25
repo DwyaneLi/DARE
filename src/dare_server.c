@@ -2013,6 +2013,7 @@ apply_committed_entries()
         /* Get entry (cannot be NULL);
         Note: the apply offset is updated locally  */
         entry = log_get_entry(data.log, &data.log->apply);
+        info(log_fp, "apply entry\n");
         if (!log_fit_entry(data.log, data.log->apply, entry)) {
             /* Not enough place for an entry (with the command) */
             data.log->apply = 0;
@@ -2021,6 +2022,7 @@ apply_committed_entries()
         
         if (!IS_LEADER) {
             /* lxl add */
+
             goto apply_entry;
         }
 
@@ -2113,6 +2115,7 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
+        info(log_fp, "apply csm entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
         if (CSM == entry->type) {
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
