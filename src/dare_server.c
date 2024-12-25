@@ -1992,7 +1992,7 @@ apply_committed_entries()
 {
     int rc;
     int once = 0;
-    
+    info(log_fp, "now start apply\n");
     uint64_t old_apply = data.log->apply;
     dare_log_entry_t *entry;
     while (log_is_offset_larger(data.log, 
@@ -2126,6 +2126,7 @@ apply_entry:
             //}
             /* lxl add */
             if(CSM_READ == entry->csm_type) {
+                info(log_fp, "this is a read entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
                 // 是自己回复的才进行应用状态机和回复，不然没必要直接跳过去就可以了
                 if(IS_LEADER) {
                     if(entry->req_id != 0) {
@@ -2147,6 +2148,7 @@ apply_entry:
                 }
 
             } else if(CSM_WRITE == entry->csm_type) {
+                info(log_fp, "this is a write entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
                 if(IS_LEADER) {
                     if(entry->req_id != 0) {
                         dare_ib_update_lrid(entry->clt_id, entry->req_id, CSM);  
