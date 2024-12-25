@@ -108,6 +108,9 @@ static int
 handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply);
 
 static int
+set_ud_ep(ud_ep_t *ud_ep, uint16_t lid, uint32_t qpn);
+
+static int
 mcast_ah_create();
 //static void
 //mcast_ah_destroy();
@@ -2819,6 +2822,22 @@ wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc)
     }
     ud_ep->qpn = wc->src_qp;
     return 0;
+}
+
+/* lxl add */
+static int
+set_ud_ep(ud_ep_t *ud_ep, uint16_t lid, uint32_t qpn) {
+    ud_ep->lid = lid;
+    if (NULL != ud_ep->ah) {
+        ud_ah_destroy(ud_ep->ah);
+    }
+    ud_ep->ah = ud_ah_create(ud_ep->lid);
+    if (NULL == ud_ep->ah) {
+        error_return(1, log_fp, "Cannot create AH for LID %"PRIu16"\n", 
+                     ud_ep->lid);
+    }
+    ud_ep->qpn = qpn;
+    return 0;    
 }
 
 /* lxl add */
