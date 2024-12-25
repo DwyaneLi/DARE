@@ -2013,7 +2013,7 @@ apply_committed_entries()
         /* Get entry (cannot be NULL);
         Note: the apply offset is updated locally  */
         entry = log_get_entry(data.log, &data.log->apply);
-        info(log_fp, "apply entry\n");
+        //info(log_fp, "apply entry\n");
         if (!log_fit_entry(data.log, data.log->apply, entry)) {
             /* Not enough place for an entry (with the command) */
             data.log->apply = 0;
@@ -2116,7 +2116,7 @@ apply_committed_entries()
 apply_entry:        
         /* Apply entry */
         if (CSM == entry->type) {
-            info(log_fp, "apply csm entry, req_id is %d, replier is %d, entry type is %d, entry csm_type is %d\n", entry->req_id, entry->replier, entry->type, entry->csm_type);
+            //info(log_fp, "apply csm entry, req_id is %d, replier is %d, entry type is %d, entry csm_type is %d\n", entry->req_id, entry->replier, entry->type, entry->csm_type);
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
@@ -2129,7 +2129,7 @@ apply_entry:
             //}
             /* lxl add */
             if(CSM_READ == entry->csm_type) {
-                info(log_fp, "this is a read entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
+                //info(log_fp, "this is a read entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
                 // 是自己回复的才进行应用状态机和回复，不然没必要直接跳过去就可以了
                 if(IS_LEADER) {
                     if(entry->req_id != 0) {
@@ -2151,7 +2151,7 @@ apply_entry:
                 }
 
             } else if(CSM_WRITE == entry->csm_type) {
-                info(log_fp, "this is a write entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
+                //info(log_fp, "this is a write entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
                 if(IS_LEADER) {
                     if(entry->req_id != 0) {
                         dare_ib_update_lrid(entry->clt_id, entry->req_id, CSM);  
