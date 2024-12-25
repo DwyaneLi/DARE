@@ -2115,7 +2115,7 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
-        info(log_fp, "apply csm entry, req_id is %d, replier is %d\n", entry->req_id, entry->replier);
+        info(log_fp, "apply csm entry, req_id is %d, replier is %d, entry type is %d, entry csm_type is %d\n", entry->req_id, entry->replier, entry->type, entry->csm_type);
         if (CSM == entry->type) {
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
