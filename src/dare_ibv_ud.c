@@ -1243,7 +1243,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
 #ifdef HISTO_BATCHING
     static int clt_count = 0;
 #endif    
-    info(log_fp, "this request->hdr.id is %d\n",request->hdr.id);
+    //info(log_fp, "this request->hdr.id is %d\n",request->hdr.id);
     /* Find the endpoint that send this request */
     dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, wc->slid);
     if (ep ==  NULL) {
@@ -2513,7 +2513,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
     }
     
     ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
-    info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
+    //info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
     if (ud_ep->lid != reply->leader_lid) {
         /* New leader: set the UD endpoint data */
         /* lxl add */
@@ -2521,7 +2521,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
         // info(log_fp, "Reply from diffrent LID: %"PRIu16" vs. %"PRIu16"\n", ud_ep->lid, wc->slid);
         set_ud_ep(ud_ep, reply->leader_lid, reply->leader_qpn);
         //info_wtime(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", ud_ep->lid, reply->hdr.type);
-        info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
+        //info(log_fp, "New group leader: %"PRIu16" (type=%"PRIu8")\n", reply->leader_lid, reply->hdr.type);
     }
     
     if (reply->data.len != 0) {
@@ -2855,7 +2855,7 @@ int ud_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd) {
     ep->committed = 1;
 
     /* create reply */
-    info(log_fp, "set read reply %d\n", req_id);
+    //info(log_fp, "set read reply %d\n", req_id);
     client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = req_id;
@@ -2907,7 +2907,7 @@ int ud_trans_clt_reply_read_request(uint16_t lid, uint64_t req_id, sm_cmd_t* cmd
     ep->ud_ep.qpn = qpn; 
 
     /* create reply */
-    info(log_fp, "set read reply %d\n", req_id);
+    //info(log_fp, "set read reply %d\n", req_id);
     client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
     memset(reply, 0, sizeof(client_rep_t));
     reply->hdr.id = req_id;
