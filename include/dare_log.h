@@ -624,7 +624,7 @@ log_append_entry_new( dare_log_t* log,
             entry->replier = i;            
         }
 
-        //info(log_fp, "request: %d entry is belong to p%d\n", req_id, entry->replier);
+        info(log_fp, "lid: %d request: %d entry is belong to p%d\n",clt_id, req_id, entry->replier);
         /* lxl add */
         entry->csm_type = csm_type;  
     }

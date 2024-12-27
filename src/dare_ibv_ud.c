@@ -2377,7 +2377,7 @@ void ud_update_lrid(uint16_t lid, uint64_t req_id, uint8_t type) {
         ep = ep_insert(&SRV_DATA->endpoints, lid);
         ep->last_req_id = 0;
     }
-    info(log_fp, "lid: %d, req_id: %d is committed\n", lid, req_id);
+    //info(log_fp, "lid: %d, req_id: %d is committed\n", lid, req_id);
     ep->last_req_id = req_id;
     ep->committed = 1;
     return ;
@@ -2432,7 +2432,7 @@ int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qp
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            //info(log_fp, "set reply %d\n", req_id);
+            info(log_fp, "set reply %d to lid: %d\n", req_id, ep->ud_ep.lid);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
