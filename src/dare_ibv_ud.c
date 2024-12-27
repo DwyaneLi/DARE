@@ -2377,7 +2377,7 @@ void ud_update_lrid(uint16_t lid, uint64_t req_id, uint8_t type) {
         ep = ep_insert(&SRV_DATA->endpoints, lid);
         ep->last_req_id = 0;
     }
-    info(log_fp, "lid: %d, req_id: %d is committed\n");
+    info(log_fp, "lid: %d, req_id: %d is committed\n", lid, req_id);
     ep->last_req_id = req_id;
     ep->committed = 1;
     return ;
