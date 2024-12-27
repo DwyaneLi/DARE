@@ -611,22 +611,23 @@ log_append_entry_new( dare_log_t* log,
     }
 
     /* lxl add */
-    entry->replier = -1;
+    int16_t replier_back = -1;
     if (type == CSM) {
         uint8_t size = get_extended_group_size(*config);
         if(size == 1) {
-            entry->replier = config->idx;
+            replier_back = config->idx;
         } else {
             int i = rand() % size;
             while((!CID_IS_SERVER_ON(config->cid, i)) || i == config->idx) {
                 i = (rand() % size);
             }
-            entry->replier = i;            
+            replier_back = i;            
         }
 
-        info(log_fp, "lid: %d request: %d entry is belong to p%d\n",clt_id, req_id, entry->replier);
         /* lxl add */
+        entry->replier = replier_back;
         entry->csm_type = csm_type;  
+        info(log_fp, "lid: %d request: %d entry is belong to p%d\n",clt_id, req_id, entry->replier);
     }
     entry->clt_qpn = clt_qpn;
     
@@ -650,6 +651,10 @@ log_append_entry_new( dare_log_t* log,
                 entry->clt_id       = clt_id;
                 entry->type         = type;
                 entry->data.cmd.len = cmd->len;
+                // lxl add
+                entry->csm_type = csm_type;
+                entry->clt_qpn = clt_qpn;
+                entry->replier = replier_back;
             }
             /* Copy the command */
             if (cmd->len) {

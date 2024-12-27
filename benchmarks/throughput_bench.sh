@@ -229,7 +229,7 @@ rm ${tmp_tfile} ${tmp_dfile}
 
 CreatrTraceForClients
 StartClients
-sleep 10
+sleep 30
 StopClients
 
 sleep 0.2
