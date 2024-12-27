@@ -96,7 +96,8 @@ StopClients() {
     #IFS=$'\n' sorted_cpids=($(sort <<<"${tmp[*]}"))
     #for i in "${sorted_cpids[@]}"; do
     for i in "${clients[@]}"; do
-        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${cpids[$i]}" "&" "pkill clt_test" )
+        # cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${cpids[$i]}" "&" "pkill clt_test" )
+        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${cpids[$i]}" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
     done
@@ -106,7 +107,7 @@ CreatrTraceForClients() {
     echo "create trace for clients"
     for i in "${clients[@]}"; do
         create_trace=( "${DAREDIR}/bin/kvs_trace" "--loop" "--${OPCODE}" "-s ${blob_size}" "-o $trace_file" )
-        cmd=("ssh" "$USER@$i" "rm -f $trace_file")
+        cmd=("ssh" "$USER@$i" "rm -rf $trace_file")
         echo "Executing: ${cmd[@]}"
         ${cmd[@]}
         cmd=("ssh" "$USER@$i" "${create_trace[@]}")
@@ -119,8 +120,8 @@ echo "start!"
 DAREDIR=""
 OPCODE="put"
 server_count=3
-client_count=8
-blob_size=64
+client_count=4
+blob_size=4
 proc=100
 for arg in "$@"
 do
@@ -193,9 +194,8 @@ echo ">>> ${server_count} servers: ${servers[@]}"
 if [ "x$OPCODE" != "xput" -a "x$OPCODE" != "xget" ]; then
     ErrorAndExit "Wrong operation type: --op."
 fi
-rm -rf data
 rm -f *.log
-mkdir -p data
+# mkdir -p data
 trace_file="$PWD/data/loop_req_${OPCODE}_${blob_size}b.trace"
 
 # Handle SIGINT to ensure a clean exit
@@ -215,7 +215,7 @@ echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
 
-sleep 2
+sleep 15
 
 # Write entry in the SM
 tmp_tfile="$PWD/tmp.trace"
@@ -236,5 +236,3 @@ sleep 0.2
 StopDare
 
 ########################################################################
-
-
