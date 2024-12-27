@@ -1282,7 +1282,7 @@ handle_one_csm_write_request( struct ibv_wc *wc, client_req_t *request )
     if (ep->last_req_id >= request->hdr.id) {
         /* Already received this request */
         if (!ep->committed) {
-            info(log_fp, "last_req_id is %d, request->hdr.id is %d\n",ep->last_req_id, request->hdr.id);
+            info(log_fp, "last_req_id is %d, request->hdr.id is %d, lid is %d\n",ep->last_req_id, request->hdr.id, ep->ud_ep.lid);
             info(log_fp, "   # CMD not yet committed1\n");
             print_rc_info();
             return;
