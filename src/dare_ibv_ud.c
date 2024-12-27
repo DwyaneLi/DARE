@@ -2513,7 +2513,7 @@ handle_csm_reply_new(struct ibv_wc *wc, client_rep_t *reply) {
     }
     
     ud_ep_t *ud_ep = (ud_ep_t*)CLT_DATA->leader_ep;
-    //info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
+    info(log_fp, "Reply from server LID: %"PRIu16" vs. %"PRIu16"(NOW), reply leader sid is %"PRIu16"\n", ud_ep->lid, wc->slid, reply->leader_lid);
     if (ud_ep->lid != reply->leader_lid) {
         /* New leader: set the UD endpoint data */
         /* lxl add */
