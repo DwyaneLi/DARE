@@ -1142,7 +1142,7 @@ handle_csm_requests( struct ibv_wc *wcs, uint16_t rd_wr_count ) {
         return MSG_NONE;
     }
  
-    //info_wtime(log_fp, "RECEIVED %"PRIu16" write and read Requests\n", rd_wr_count);
+    info(log_fp, "RECEIVED %"PRIu16" write and read Requests\n", rd_wr_count);
     
     for (i = 0; i < rd_wr_count; i++) {
         ud_hdr = (ud_hdr_t*)(IBDEV->ud_recv_bufs[wcs[i].wr_id] + 40);
@@ -1393,8 +1393,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case CSM_READ:
         {
             /* Read request from a client */
-            //info(log_fp, ">> Received read request from a client with lid%"
-            //    PRIu16"\n", wc->slid);
+            info(log_fp, ">> Received read request from a client with lid%"
+                PRIu16"\n", wc->slid);
             if (!is_leader()) {
                 /* Ignore request */
                 break;
@@ -1409,8 +1409,8 @@ handle_message_from_client( struct ibv_wc *wc, ud_hdr_t *ud_hdr )
         case CSM_WRITE:
         {
             /* Write request from a client */
-            //info(log_fp, ">> Received write request from a client with lid%"
-            //    PRIu16"\n", wc->slid);
+            info(log_fp, ">> Received write request from a client with lid%"
+                PRIu16"\n", wc->slid);
             if (!is_leader()) {
                 /* Ignore request */
                 break;
@@ -2178,7 +2178,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    //info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2207,6 +2207,7 @@ int ud_resend_clt_request()
     }
     
     /* Send request */
+    info(log_fp, "now in ud_resend_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
