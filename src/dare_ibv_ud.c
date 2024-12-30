@@ -959,6 +959,7 @@ get_message:
         }
         if((CSM_READ == type || CSM_WRITE == type) && (CSM_READ == prev_type || CSM_WRITE == prev_type)) {
             /* csm request; gather more*/
+            info(log_fp, "receive csm request\n");
             rd_wr_count++;
             goto get_message;
         }
