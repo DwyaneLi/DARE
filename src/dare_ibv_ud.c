@@ -2323,7 +2323,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            //info(log_fp, "set reply %d\n", req_id);
+            info(log_fp, "set reply %d\n", req_id);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
@@ -2432,7 +2432,7 @@ int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qp
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            //info(log_fp, "set reply %d to lid: %d\n", req_id, ep->ud_ep.lid);
+            info(log_fp, "set reply %d to lid: %d\n", req_id, ep->ud_ep.lid);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
