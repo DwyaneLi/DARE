@@ -923,6 +923,7 @@ uint8_t ud_get_message_new()
 
 get_message:    
     ne = ibv_poll_cq(IBDEV->ud_rcq, 1, wc);
+    info(log_fp, "receive a request\n");
     if (ne < 0) {
         error_return(MSG_ERROR, log_fp, "Couldn't poll completion queue\n");
     }
@@ -2232,6 +2233,7 @@ send_clt_request( uint32_t len )
     //ud_ep->lid = 0;
     if (0 != ud_ep->lid) {
         /* There is a known leader */
+        info(log_fp, "leader lid is %d, direct send\n", ud_ep->lid);
         rc = ud_send_message(ud_ep, len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over UD "
@@ -2240,6 +2242,7 @@ send_clt_request( uint32_t len )
     }
     else {
         /* No leader known */
+        info(log_fp, "leader lid is %d, multisend send\n", ud_ep->lid);
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
