@@ -923,7 +923,6 @@ uint8_t ud_get_message_new()
 
 get_message:    
     ne = ibv_poll_cq(IBDEV->ud_rcq, 1, wc);
-    info(log_fp, "receive a request\n");
     if (ne < 0) {
         error_return(MSG_ERROR, log_fp, "Couldn't poll completion queue\n");
     }
@@ -951,8 +950,10 @@ get_message:
         //dump_bytes(log_fp, ud_hdr, wc->byte_len - 40, "received bytes");
         /* Increase WC count */
         wc_count++; wc++;
+        info(log_fp, "receive request, type is %d\n", ud_hdr->type);
         /* Only the server can receive READ or WRITE requests */
         if (IBV_SERVER != IBDEV->ulp_type) goto handle_messages;
+        info(log_fp, "receive request flag\n");
         /* Check the type of the operation */
         type = ud_hdr->type;
         if (MSG_NONE == prev_type) {
