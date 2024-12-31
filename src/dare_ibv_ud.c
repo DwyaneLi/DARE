@@ -2144,11 +2144,11 @@ int ud_create_clt_request()
             csm_req->cmd.len = bytes_read * sizeof(kvs_cmd_t);
             len += csm_req->cmd.len;
             
-            info(log_fp, "\nTrace cmd: [%s] %s key=%s; data len=%"PRIu16"\n", 
-                (hdr->type == CSM_READ) ? "READ" : "WRITE", 
-                (kvs_cmd->type == KVS_PUT) ? "PUT" : 
-                (kvs_cmd->type == KVS_GET) ? "GET" : "RM", 
-                kvs_cmd->key, kvs_cmd->len);
+            //info(log_fp, "\nTrace cmd: [%s] %s key=%s; data len=%"PRIu16"\n", 
+            //    (hdr->type == CSM_READ) ? "READ" : "WRITE", 
+            //    (kvs_cmd->type == KVS_PUT) ? "PUT" : 
+            //    (kvs_cmd->type == KVS_GET) ? "GET" : "RM", 
+            //    kvs_cmd->key, kvs_cmd->len);
             
             /* Read possible data */
             if (len + kvs_cmd->len > mtu_value(IBDEV->mtu)) {
