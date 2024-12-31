@@ -120,8 +120,8 @@ DAREDIR=""
 OPCODE="put"
 server_count=3
 client_count=4
-blob_size=1024
-proc=100
+blob_size=256
+proc=0
 for arg in "$@"
 do
     case ${arg} in
