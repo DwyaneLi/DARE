@@ -950,10 +950,10 @@ get_message:
         //dump_bytes(log_fp, ud_hdr, wc->byte_len - 40, "received bytes");
         /* Increase WC count */
         wc_count++; wc++;
-        info(log_fp, "receive request, type is %d\n", ud_hdr->type);
+        //info(log_fp, "receive request, type is %d\n", ud_hdr->type);
         /* Only the server can receive READ or WRITE requests */
         if (IBV_SERVER != IBDEV->ulp_type) goto handle_messages;
-        info(log_fp, "receive request flag\n");
+        //info(log_fp, "receive request flag\n");
         /* Check the type of the operation */
         type = ud_hdr->type;
         if (MSG_NONE == prev_type) {
@@ -961,7 +961,7 @@ get_message:
         }
         if((CSM_READ == type || CSM_WRITE == type) && (CSM_READ == prev_type || CSM_WRITE == prev_type)) {
             /* csm request; gather more*/
-            info(log_fp, "receive csm request\n");
+            //info(log_fp, "receive csm request\n");
             rd_wr_count++;
             goto get_message;
         }
@@ -1145,7 +1145,7 @@ handle_csm_requests( struct ibv_wc *wcs, uint16_t rd_wr_count ) {
         return MSG_NONE;
     }
  
-    info(log_fp, "RECEIVED %"PRIu16" write and read Requests\n", rd_wr_count);
+    //info(log_fp, "RECEIVED %"PRIu16" write and read Requests\n", rd_wr_count);
     
     for (i = 0; i < rd_wr_count; i++) {
         ud_hdr = (ud_hdr_t*)(IBDEV->ud_recv_bufs[wcs[i].wr_id] + 40);
@@ -2181,7 +2181,7 @@ send_request:
     if (CLT_TYPE_RTRACE == CLT_DATA->input->clt_type) {
         HRT_GET_TIMESTAMP(CLT_DATA->t1);
     }
-    info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    //info(log_fp, "now in ud_create_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2210,7 +2210,7 @@ int ud_resend_clt_request()
     }
     
     /* Send request */
-    info(log_fp, "now in ud_resend_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
+    //info(log_fp, "now in ud_resend_clt_request call send_clt_request, type:%u request id:%d\n", hdr->type, hdr->id);
     return send_clt_request(len);
 }
 
@@ -2234,7 +2234,7 @@ send_clt_request( uint32_t len )
     //ud_ep->lid = 0;
     if (0 != ud_ep->lid) {
         /* There is a known leader */
-        info(log_fp, "leader lid is %d, direct send\n", ud_ep->lid);
+        //info(log_fp, "leader lid is %d, direct send\n", ud_ep->lid);
         rc = ud_send_message(ud_ep, len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over UD "
@@ -2243,7 +2243,7 @@ send_clt_request( uint32_t len )
     }
     else {
         /* No leader known */
-        info(log_fp, "leader lid is %d, multisend send\n", ud_ep->lid);
+        //info(log_fp, "leader lid is %d, multisend send\n", ud_ep->lid);
         rc = mcast_send_message(len);
         if (0 != rc) {
             error_return(1, log_fp, "Cannot send message over mcast\n");
@@ -2329,7 +2329,7 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            info(log_fp, "set reply %d\n", req_id);
+            //info(log_fp, "set reply %d\n", req_id);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
@@ -2438,7 +2438,7 @@ int ud_trans_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type, uint32_t qp
 
             csm_reply->data.len = 0;
             len = sizeof(client_rep_t);
-            info(log_fp, "set reply %d to lid: %d\n", req_id, ep->ud_ep.lid);
+            //info(log_fp, "set reply %d to lid: %d\n", req_id, ep->ud_ep.lid);
 #ifdef WRITE_BENCH            
             //HRT_GET_TIMESTAMP(SRV_DATA->t2);
             HRT_GET_ELAPSED_TICKS(SRV_DATA->t1, SRV_DATA->t2, &ticks[measure_count]);
