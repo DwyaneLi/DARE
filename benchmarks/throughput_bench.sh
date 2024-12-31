@@ -121,8 +121,8 @@ DAREDIR=""
 OPCODE="put"
 server_count=3
 client_count=4
-blob_size=4
-proc=100
+blob_size=1024
+proc=0
 for arg in "$@"
 do
     case ${arg} in
@@ -215,7 +215,7 @@ echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
 
-sleep 15
+sleep 10
 
 # Write entry in the SM
 tmp_tfile="$PWD/tmp.trace"
